@@ -782,7 +782,7 @@ class BotAsistente {
 
         if (greetings.some(g => q === g || q.startsWith(g + " "))) {
             const currentMonthName = this.getCurrentMonthName();
-            return `¡Buenas! ¿Cómo andás? 😊 Acá estoy para darte una mano con la planilla de gastos.<br><br>` +
+            return `¡Buenas! ¿Cómo andás? 😊 Acá estoy para darte una mano con el sistema de gastos.<br><br>` +
                    `Contame, ¿qué querés chusmear hoy? Podés preguntarme cosas como:<br>` +
                    `• <i>"¿Qué debo pagar en ${currentMonthName}?"</i><br>` +
                    `• <i>"¿Cuánto gasté en Luz este año?"</i><br>` +
@@ -810,7 +810,7 @@ class BotAsistente {
                             window.updateTaxCell(month, taxName, amount);
                         }
                         this.context = null; // Limpiar contexto
-                        return `¡Buenísimo! Registrado de una en la planilla: 📝<br><br>` +
+                        return `¡Buenísimo! Registrado de una en el sistema: 📝<br><br>` +
                             `• Servicio: <strong>${taxName}</strong><br>` +
                             `• Mes: <strong>${month}</strong><br>` +
                             `• Monto: <strong>$${amount.toLocaleString('es-AR')}</strong><br><br>` +
@@ -839,7 +839,7 @@ class BotAsistente {
                 } else if (negative.some(word => q.includes(word))) {
                     const { taxName, month } = this.context;
                     this.context = null; // Limpiar contexto
-                    return `De una, cancelé el registro para <strong>${taxName}</strong> de <strong>${month}</strong>. No modifiqué nada de la planilla. 👍`;
+                    return `De una, cancelé el registro para <strong>${taxName}</strong> de <strong>${month}</strong>. No modifiqué nada del sistema. 👍`;
                 } else {
                     // Si no escribió afirmación ni negación pero introdujo otra orden, cancelamos contexto
                     this.context = null;
@@ -887,7 +887,7 @@ class BotAsistente {
         const hasDeleteKeyword = q.includes('borrar') || q.includes('elimina') || q.includes('quitar') || q.includes('deshacer');
         const hasDetectedTax = matchedTax || (parsed.detectedTaxes && parsed.detectedTaxes.length > 0);
         if (hasDeleteKeyword && hasDetectedTax) {
-            return this.handleDeleteNLP(parsed);
+            return this.handleDeleteNLP(parsed, q);
         }
 
         // 3. Comando Cargar/Pagar directo
@@ -1252,14 +1252,39 @@ class BotAsistente {
     }
 
     // Procesar borrar pago
-    handleDeleteNLP(parsed) {
+    handleDeleteNLP(parsed, q) {
         const { detectedMonth, detectedTax } = parsed;
-        const finalMonth = detectedMonth || this.getCurrentMonthName();
+        let finalMonth = detectedMonth;
+
         if (!detectedTax) return "No entendí bien qué impuesto o servicio querés borrar. Decime algo como 'borrar luz de mayo'.";
+
+        // Si pide borrar "el último", ignoramos el mes detectado por defecto y buscamos cuál fue
+        const textLower = (q || "").toLowerCase();
+        const isUltimo = textLower.includes('ultimo') || textLower.includes('último') || textLower.includes('ese');
+        
+        if (isUltimo) {
+            const data = window.database || [];
+            let lastPaidMonth = "";
+            data.forEach(row => {
+                const val = parseFloat(this.getRowValue(row, detectedTax));
+                if (!isNaN(val) && val > 0) {
+                    lastPaidMonth = row.Mes;
+                }
+            });
+            if (lastPaidMonth) {
+                finalMonth = lastPaidMonth;
+            } else {
+                return `No encontré ningún pago registrado de **${detectedTax}** para borrar.`;
+            }
+        }
+
+        if (!finalMonth) {
+            finalMonth = this.getCurrentMonthName();
+        }
         
         if (window.updateTaxCell) {
             window.updateTaxCell(finalMonth, detectedTax, 0);
-            return `🗑️ ¡Listo! He borrado el pago de **${detectedTax}** del mes de **${finalMonth}**.<br><br>Ya se actualizó en la planilla.`;
+            return `🗑️ ¡Listo! He borrado el pago de **${detectedTax}** del mes de **${finalMonth}**.<br><br>Ya se actualizó en el sistema.`;
         }
         return "Hubo un error al intentar borrar el pago.";
     }
@@ -1273,7 +1298,7 @@ class BotAsistente {
 
         // 1. Si hay múltiples coincidencias (ej. "peugeot" sin especificar seguro o patente)
         if (detectedTaxes && detectedTaxes.length > 1) {
-            let reply = `📋 **Mapeando planilla...** Detecté que quieres registrar un pago en **${finalMonth}** pero coincide con más de un servicio en tu planilla. ¿Cuál de ellos deseas registrar?<br><br>`;
+            let reply = `📋 **Mapeando sistema...** Detecté que quieres registrar un pago en **${finalMonth}** pero coincide con más de un servicio en tu sistema. ¿Cuál de ellos deseas registrar?<br><br>`;
             
             detectedTaxes.forEach(tax => {
                 let currentValue = null;
@@ -1353,7 +1378,7 @@ class BotAsistente {
                     amount: lastPaid
                 };
 
-                let reply = `📋 **Mapeando planilla...** Detecté que **${detectedTax}** ${detectedProperty ? `(en ${detectedProperty})` : ''} está **PENDIENTE** en **${finalMonth}**.<br><br>` +
+                let reply = `📋 **Mapeando sistema...** Detecté que **${detectedTax}** ${detectedProperty ? `(en ${detectedProperty})` : ''} está **PENDIENTE** en **${finalMonth}**.<br><br>` +
                     `• Último monto pagado en tu historial: <strong>$${lastPaid.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong>.<br><br>` +
                     `¿Quieres registrar este mismo valor en la celda de **${finalMonth}**?<br><br>` +
                     `<button class="btn-chat-action" onclick="window.botInstance.confirmPayment('${finalMonth}', '${detectedTax}', ${lastPaid}, this)">` +
@@ -1369,7 +1394,7 @@ class BotAsistente {
                     property: detectedProperty
                 };
 
-                let reply = `📋 **Mapeando planilla...** Detecté que **${detectedTax}** ${detectedProperty ? `(en ${detectedProperty})` : ''} está **PENDIENTE** en **${finalMonth}**.<br><br>` +
+                let reply = `📋 **Mapeando sistema...** Detecté que **${detectedTax}** ${detectedProperty ? `(en ${detectedProperty})` : ''} está **PENDIENTE** en **${finalMonth}**.<br><br>` +
                     `No encontré registros de pagos anteriores para este servicio en tu historial.<br><br>` +
                     `Por favor, indícame qué monto deseas registrar escribiendo en el chat, por ejemplo: <i>"pagar ${detectedTax} 85000"</i>.`;
                 return reply;
