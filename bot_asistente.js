@@ -64,7 +64,7 @@ const SmartNLPParser = {
     },
 
     parse(rawText) {
-        const text = rawText.toLowerCase().trim();
+        const text = rawText.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
         let detectedMonth = null;
         let detectedTax = null;
         let detectedAmount = null;
