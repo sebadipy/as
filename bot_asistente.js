@@ -572,45 +572,89 @@ class BotAsistente {
 
             /* ===== INPUT AREA ===== */
             .bot-input-area {
-                padding: 8px 10px;
+                padding: 6px 8px;
                 background: #f0f0f0;
                 border-top: 1px solid #ddd;
                 display: flex;
                 gap: 8px;
                 align-items: center;
+                width: 100%;
+                box-sizing: border-box;
             }
 
-            .bot-input-area input {
+            .wa-action-btn {
+                background: none;
+                border: none;
+                color: #54656f;
+                font-size: 1.4rem;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 4px;
+                flex-shrink: 0;
+            }
+
+            .wa-input-container {
+                flex: 1;
+                background: #ffffff;
+                border-radius: 22px;
+                display: flex;
+                align-items: center;
+                padding: 0 12px;
+                gap: 8px;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                min-width: 0;
+                height: 38px;
+            }
+
+            .wa-input-container input {
                 flex: 1;
                 border: none;
-                border-radius: 22px;
-                padding: 9px 16px;
-                font-size: 0.85rem;
                 outline: none;
-                background: #ffffff;
+                font-size: 0.9rem;
+                background: transparent;
+                padding: 8px 0;
                 color: #111;
-                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                min-width: 0;
             }
 
-            .bot-input-area input::placeholder { color: #aaa; }
+            .wa-inner-icon {
+                color: #54656f;
+                font-size: 1.15rem;
+                cursor: pointer;
+                flex-shrink: 0;
+                transition: opacity 0.2s;
+            }
 
             .bot-send-btn {
-                background: #25D366;
-                color: white;
-                border: none;
-                width: 40px;
-                height: 40px;
+                width: 38px;
+                height: 38px;
                 border-radius: 50%;
+                border: none;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
                 transition: all 0.2s;
                 flex-shrink: 0;
-                box-shadow: 0 2px 5px rgba(37,211,102,0.35);
             }
+
+            .bot-send-btn.wa-mic-state {
+                background: transparent;
+                color: #54656f;
+                box-shadow: none;
+                font-size: 1.25rem;
+            }
+
+            .bot-send-btn.wa-send-state {
+                background: #00a884;
+                color: white;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+                font-size: 1rem;
+            }
+
             .bot-send-btn:hover {
-                background: #128C7E;
                 transform: scale(1.05);
             }
         `;
@@ -647,8 +691,17 @@ class BotAsistente {
                     <button class="suggestion-btn" onclick="window.botInstance.sendPreset('¿Cuánto gaste en Luz este año?')">Total Luz</button>
                 </div>
                 <div class="bot-input-area">
-                    <input type="text" id="botInput" placeholder="Escribe un mensaje..." onkeypress="window.botInstance.handleKeyPress(event)">
-                    <button class="bot-send-btn" onclick="window.botInstance.submitUserMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                    <button class="wa-action-btn wa-plus-btn" onclick="if (window.showToast) window.showToast('Adjuntar', 'Función de adjuntos no disponible.', 'error');">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                    <div class="wa-input-container">
+                        <input type="text" id="botInput" placeholder="Escribe un mensaje..." onkeypress="window.botInstance.handleKeyPress(event)" oninput="window.botInstance.handleInput(event)">
+                        <i class="fa-regular fa-face-smile wa-inner-icon wa-smile-icon"></i>
+                        <i class="fa-solid fa-camera wa-inner-icon wa-camera-icon" id="waCameraIcon"></i>
+                    </div>
+                    <button class="bot-send-btn wa-mic-state" id="botSendBtn" onclick="window.botInstance.submitUserMessage()">
+                        <i class="fa-solid fa-microphone" id="botSendIcon"></i>
+                    </button>
                 </div>
             </div>
         `;
@@ -687,6 +740,37 @@ class BotAsistente {
     handleKeyPress(event) {
         if (event.key === 'Enter') {
             this.submitUserMessage();
+        }
+    }
+
+    handleInput(event) {
+        const text = event.target.value;
+        const sendBtn = document.getElementById('botSendBtn');
+        const sendIcon = document.getElementById('botSendIcon');
+        const cameraIcon = document.getElementById('waCameraIcon');
+
+        if (text && text.trim().length > 0) {
+            if (sendBtn) {
+                sendBtn.classList.remove('wa-mic-state');
+                sendBtn.classList.add('wa-send-state');
+            }
+            if (sendIcon) {
+                sendIcon.className = 'fa-solid fa-paper-plane';
+            }
+            if (cameraIcon) {
+                cameraIcon.style.display = 'none';
+            }
+        } else {
+            if (sendBtn) {
+                sendBtn.classList.remove('wa-send-state');
+                sendBtn.classList.add('wa-mic-state');
+            }
+            if (sendIcon) {
+                sendIcon.className = 'fa-solid fa-microphone';
+            }
+            if (cameraIcon) {
+                cameraIcon.style.display = 'block';
+            }
         }
     }
 
@@ -732,11 +816,31 @@ class BotAsistente {
     submitUserMessage() {
         const input = document.getElementById('botInput');
         const text = input.value.trim();
-        if (!text) return;
+        if (!text) {
+            if (window.showToast) {
+                window.showToast('Nota de voz', 'La grabación de voz no está habilitada.', 'error');
+            }
+            return;
+        }
 
         // Renderizar mensaje del usuario
         this.appendMessage(text, 'user');
         input.value = '';
+
+        // Resetear el estado del botón a micrófono y volver a mostrar la cámara
+        const sendBtn = document.getElementById('botSendBtn');
+        const sendIcon = document.getElementById('botSendIcon');
+        const cameraIcon = document.getElementById('waCameraIcon');
+        if (sendBtn) {
+            sendBtn.classList.remove('wa-send-state');
+            sendBtn.classList.add('wa-mic-state');
+        }
+        if (sendIcon) {
+            sendIcon.className = 'fa-solid fa-microphone';
+        }
+        if (cameraIcon) {
+            cameraIcon.style.display = 'block';
+        }
 
         // Mostrar indicador de pensando (tres puntos saltarines)
         this.showTypingIndicator();
