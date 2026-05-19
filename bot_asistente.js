@@ -605,6 +605,10 @@ class BotAsistente {
         // Crear la estructura HTML del widget
         const widget = document.createElement('div');
         widget.className = 'bot-widget';
+        
+        // Detección estricta de dispositivo móvil
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
         widget.innerHTML = `
             <div class="bot-bubble-trigger" id="botTrigger" onclick="window.botInstance.toggleWindow()">
                 <i class="fa-brands fa-whatsapp"></i>
@@ -618,7 +622,7 @@ class BotAsistente {
                         <h4>Asistente Virtual</h4>
                         <span>En línea</span>
                     </div>
-                    <div class="mobile-header-actions">
+                    <div class="mobile-header-actions" style="display: ${isMobile ? 'flex' : 'none'} !important;">
                         <button disabled title="Alquileres (Próximamente)"><i class="fa-solid fa-house-user"></i></button>
                         <button disabled title="Limpieza (Próximamente)"><i class="fa-solid fa-broom"></i></button>
                     </div>
