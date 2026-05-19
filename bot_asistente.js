@@ -89,7 +89,9 @@ const SmartNLPParser = {
 
         // 3. Detect Month
         this.MONTHS.forEach(m => {
-            if (text.includes(m.toLowerCase()) || text.includes(m.substring(0, 3).toLowerCase())) {
+            const regexM = new RegExp('\\b' + m.toLowerCase() + '\\b');
+            const regexM3 = new RegExp('\\b' + m.substring(0, 3).toLowerCase() + '\\b');
+            if (regexM.test(text) || regexM3.test(text)) {
                 detectedMonth = m;
             }
         });
@@ -120,7 +122,8 @@ const SmartNLPParser = {
 
             // A. Coincidencia por sinónimos
             for (const [syn, taxName] of Object.entries(this.SYNONYMS)) {
-                if (text.includes(syn) && normCol.includes(taxName.toLowerCase())) {
+                const regex = new RegExp('\\b' + syn + '\\b');
+                if (regex.test(text) && normCol.includes(taxName.toLowerCase())) {
                     score += 10;
                 }
             }
@@ -128,20 +131,21 @@ const SmartNLPParser = {
             // B. Coincidencia por palabras individuales
             const words = normCol.replace(/[()./]/g, ' ').split(/\s+/).filter(w => w.length > 2);
             words.forEach(w => {
-                if (text.includes(w)) {
+                const regexW = new RegExp('\\b' + w + '\\b');
+                if (regexW.test(text)) {
                     score += 5;
                 }
             });
 
             // C. Modificadores específicos para afinar
-            if (text.includes('luz') && normCol.includes('luz')) score += 5;
-            if (text.includes('gas') && normCol.includes('gas')) score += 5;
-            if (text.includes('arba') && normCol.includes('arba')) score += 5;
-            if (text.includes('peugeot') && normCol.includes('peugeot')) score += 5;
-            if (text.includes('etios') && normCol.includes('etios')) score += 5;
-            if (text.includes('expensas') && normCol.includes('expensas')) score += 5;
-            if (text.includes('mgp') && normCol.includes('mgp')) score += 5;
-            if (text.includes('cochera') && normCol.includes('cochera')) score += 5;
+            if (/\bluz\b/.test(text) && normCol.includes('luz')) score += 5;
+            if (/\bgas\b/.test(text) && normCol.includes('gas')) score += 5;
+            if (/\barba\b/.test(text) && normCol.includes('arba')) score += 5;
+            if (/\bpeugeot\b/.test(text) && normCol.includes('peugeot')) score += 5;
+            if (/\betios\b/.test(text) && normCol.includes('etios')) score += 5;
+            if (/\bexpensas\b/.test(text) && normCol.includes('expensas')) score += 5;
+            if (/\bmgp\b/.test(text) && normCol.includes('mgp')) score += 5;
+            if (/\bcochera\b/.test(text) && normCol.includes('cochera')) score += 5;
 
             if (score > highestScore) {
                 highestScore = score;
@@ -691,9 +695,7 @@ class BotAsistente {
         const input = document.getElementById('botInput');
         const text = input.value.trim();
         if (!text) {
-            if (window.showToast) {
-                window.showToast('Nota de voz', 'La grabación de voz no está habilitada.', 'error');
-            }
+            this.appendMessage('Debe escribirme un mensaje de texto.', 'bot');
             return;
         }
 
@@ -847,13 +849,49 @@ class BotAsistente {
 
         // 1. Usar el SmartNLPParser unificado para resolver mes, tributo y propiedad
         const parsed = window.SmartNLPParser.parse(query);
-        const matchedMonth = parsed.detectedMonth;
-        const matchedTax = parsed.detectedTax;
-        const matchedProperty = parsed.detectedProperty;
+        let matchedMonth = parsed.detectedMonth;
+        let matchedTax = parsed.detectedTax;
+        let matchedProperty = parsed.detectedProperty;
 
-        // 2. Comando Cargar/Pagar directo (solo si detectó algún servicio/tributo coincidente)
-        const hasDirectCommandKeyword = q.includes('cargar') || q.includes('pagar') || q.includes('registra') || q.includes('subir');
+        // Memoria contextual: si el usuario menciona una propiedad pero no el impuesto, 
+        // usamos el último impuesto sobre el que veníamos hablando.
+        if (!matchedTax && this.lastTopic && this.lastTopic.tax) {
+            // Re-evaluar considerando la propiedad actual
+            if (matchedProperty) {
+                const baseTax = this.lastTopic.tax.split(' ')[0]; // Ej. "Luz" de "Luz Gascon"
+                // Buscar si existe el impuesto para esa propiedad
+                const newTaxCandidate = `${baseTax} ${matchedProperty}`;
+                if (window.TAX_COLUMNS && window.TAX_COLUMNS.includes(newTaxCandidate)) {
+                    matchedTax = newTaxCandidate;
+                } else if (window.TAX_COLUMNS && window.TAX_COLUMNS.includes(baseTax) && matchedProperty.toLowerCase() === 'roca') {
+                    matchedTax = baseTax; // Roca usa el nombre base
+                } else {
+                    matchedTax = this.lastTopic.tax;
+                }
+            } else {
+                matchedTax = this.lastTopic.tax;
+            }
+            parsed.detectedTax = matchedTax;
+            if (!matchedMonth && this.lastTopic.month) {
+                matchedMonth = this.lastTopic.month;
+                parsed.detectedMonth = matchedMonth;
+            }
+        }
+        
+        // Guardar contexto para la próxima pregunta
+        if (matchedTax) {
+            this.lastTopic = { tax: matchedTax, month: matchedMonth };
+        }
+
+        // 2. Comando Borrar / Eliminar
+        const hasDeleteKeyword = q.includes('borrar') || q.includes('elimina') || q.includes('quitar') || q.includes('deshacer');
         const hasDetectedTax = matchedTax || (parsed.detectedTaxes && parsed.detectedTaxes.length > 0);
+        if (hasDeleteKeyword && hasDetectedTax) {
+            return this.handleDeleteNLP(parsed);
+        }
+
+        // 3. Comando Cargar/Pagar directo
+        const hasDirectCommandKeyword = q.includes('cargar') || q.includes('pagar') || q.includes('registra') || q.includes('subir');
         if (hasDirectCommandKeyword && hasDetectedTax) {
             return this.handleQuickLoadNLP(query); // Pasamos query original para no perder cifras decimales
         }
@@ -1211,6 +1249,19 @@ class BotAsistente {
 
     getCurrentMonthName() {
         return this.MONTHS[new Date().getMonth()];
+    }
+
+    // Procesar borrar pago
+    handleDeleteNLP(parsed) {
+        const { detectedMonth, detectedTax } = parsed;
+        const finalMonth = detectedMonth || this.getCurrentMonthName();
+        if (!detectedTax) return "No entendí bien qué impuesto o servicio querés borrar. Decime algo como 'borrar luz de mayo'.";
+        
+        if (window.updateTaxCell) {
+            window.updateTaxCell(finalMonth, detectedTax, 0);
+            return `🗑️ ¡Listo! He borrado el pago de **${detectedTax}** del mes de **${finalMonth}**.<br><br>Ya se actualizó en la planilla.`;
+        }
+        return "Hubo un error al intentar borrar el pago.";
     }
 
     // Procesar la carga rápida del bot

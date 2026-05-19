@@ -1349,10 +1349,14 @@
         async function updateTaxCell(mes, columna, monto) {
             setProcessing(true);
 
+            // Determinar si es borrado/limpieza
+            let isDelete = (monto === 0 || monto === "" || String(monto).trim() === "-" || String(monto).toLowerCase() === "borrar");
+            let finalMontoToBackend = isDelete ? "" : monto;
+
             // Optimistic UI update: actualizar la base de datos local de inmediato
             let rowData = database.find(r => r.Mes.trim().toLowerCase() === mes.trim().toLowerCase());
             if (rowData) {
-                rowData[columna] = monto === 0 ? "-" : monto;
+                rowData[columna] = isDelete ? "-" : monto;
             }
             renderMatrixTable();
             calculateKPIs();
@@ -1366,8 +1370,8 @@
             }
 
             try {
-                // Enviar como GET (CORS-immune, preflight-safe, 100% confiable)
-                const url = `${SCRIPT_URL}?action=updateCell&mes=${encodeURIComponent(mes)}&columna=${encodeURIComponent(columna)}&monto=${encodeURIComponent(monto)}`;
+                // Enviar como GET. Al mandar "", Apps Script borrará el contenido de la celda.
+                const url = `${SCRIPT_URL}?action=updateCell&mes=${encodeURIComponent(mes)}&columna=${encodeURIComponent(columna)}&monto=${encodeURIComponent(finalMontoToBackend)}`;
                 
                 const response = await fetch(url, {
                     method: 'GET'
