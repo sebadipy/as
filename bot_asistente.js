@@ -325,6 +325,10 @@ class BotAsistente {
                 .bot-close {
                     display: none !important;
                 }
+                .mobile-header-actions {
+                    display: flex !important;
+                    margin-right: 15px;
+                }
             }
 
             /* ===== HEADER ESTILO WHATSAPP ===== */
@@ -377,6 +381,21 @@ class BotAsistente {
                 padding: 4px 6px;
             }
             .bot-close:hover { color: white; }
+
+            .mobile-header-actions {
+                display: none;
+                margin-left: auto;
+                gap: 18px;
+                align-items: center;
+            }
+            .mobile-header-actions button {
+                background: none;
+                border: none;
+                color: rgba(255,255,255,0.5); /* Disabled state */
+                font-size: 1.2rem;
+                padding: 0;
+                cursor: not-allowed;
+            }
 
             /* ===== ÁREA DE MENSAJES (wallpaper) ===== */
             .bot-messages {
@@ -598,6 +617,10 @@ class BotAsistente {
                     <div class="bot-info">
                         <h4>Asistente Virtual</h4>
                         <span>En línea</span>
+                    </div>
+                    <div class="mobile-header-actions">
+                        <button disabled title="Alquileres (Próximamente)"><i class="fa-solid fa-house-user"></i></button>
+                        <button disabled title="Limpieza (Próximamente)"><i class="fa-solid fa-broom"></i></button>
                     </div>
                     <button class="bot-close" onclick="window.botInstance.toggleWindow()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
