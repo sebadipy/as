@@ -321,12 +321,6 @@ class BotAsistente {
                 .bot-close {
                     display: none !important;
                 }
-                .bot-header-actions {
-                    display: flex !important;
-                }
-                .wa-back-arrow {
-                    display: block !important;
-                }
             }
 
             /* ===== HEADER ESTILO WHATSAPP ===== */
@@ -366,20 +360,6 @@ class BotAsistente {
                 align-items: center;
                 gap: 4px;
                 margin-top: 1px;
-            }
-
-            .bot-status-dot {
-                width: 7px;
-                height: 7px;
-                background: #25D366;
-                border-radius: 50%;
-                display: inline-block;
-                animation: wa-pulse 2s infinite;
-            }
-
-            @keyframes wa-pulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.4; }
             }
 
             .bot-close {
@@ -514,35 +494,6 @@ class BotAsistente {
                 30% { transform: translateY(-5px); }
             }
 
-            /* ===== SUGERENCIAS ===== */
-            .bot-suggestions {
-                display: flex;
-                gap: 6px;
-                padding: 6px 10px;
-                overflow-x: auto;
-                background: #f0f0f0;
-                border-top: 1px solid #ddd;
-                scrollbar-width: none;
-            }
-            .bot-suggestions::-webkit-scrollbar { display: none; }
-
-            .suggestion-btn {
-                background: #ffffff;
-                color: #075E54;
-                border: 1px solid #25D366;
-                padding: 5px 11px;
-                border-radius: 18px;
-                font-size: 0.73rem;
-                font-weight: 600;
-                cursor: pointer;
-                white-space: nowrap;
-                transition: all 0.18s;
-            }
-            .suggestion-btn:hover {
-                background: #25D366;
-                color: white;
-            }
-
             /* ===== BOTÓN ACCIÓN EN CHAT ===== */
             .btn-chat-action {
                 background: #25D366;
@@ -647,27 +598,16 @@ class BotAsistente {
             </div>
             <div class="bot-window" id="botWindow">
                 <div class="bot-header">
-                    <i class="fa-solid fa-arrow-left wa-back-arrow" style="display: none; font-size: 1.1rem; cursor: pointer; color: white; margin-right: 5px;"></i>
                     <div class="bot-avatar">
                         <i class="fa-solid fa-robot" style="color:#fff;"></i>
                     </div>
                     <div class="bot-info">
-                        <h4>Asistente Inteligente</h4>
-                        <span><span class="bot-status-dot"></span>en línea</span>
-                    </div>
-                    <div class="bot-header-actions" style="margin-left: auto; display: none; align-items: center; gap: 18px; font-size: 1.1rem; color: rgba(255,255,255,0.9); margin-right: 5px;">
-                        <i class="fa-solid fa-video" style="cursor: pointer;"></i>
-                        <i class="fa-solid fa-phone" style="cursor: pointer;"></i>
-                        <i class="fa-solid fa-ellipsis-vertical" style="cursor: pointer;"></i>
+                        <h4>Asistente Virtual</h4>
+                        <span>En línea</span>
                     </div>
                     <button class="bot-close" onclick="window.botInstance.toggleWindow()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="bot-messages" id="botMessages"></div>
-                <div class="bot-suggestions" id="botSuggestions">
-                    <button class="suggestion-btn" onclick="window.botInstance.sendPreset('¿Qué debo pagar este mes?')">¿Qué debo pagar?</button>
-                    <button class="suggestion-btn" onclick="window.botInstance.sendPreset('Resumen de gastos de Enero')">Gastos Enero</button>
-                    <button class="suggestion-btn" onclick="window.botInstance.sendPreset('¿Cuánto gaste en Luz este año?')">Total Luz</button>
-                </div>
                 <div class="bot-input-area">
                     <div class="wa-input-container">
                         <input type="text" id="botInput" placeholder="Escribe un mensaje..." onkeypress="window.botInstance.handleKeyPress(event)" oninput="window.botInstance.handleInput(event)">
