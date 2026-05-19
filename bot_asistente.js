@@ -582,27 +582,13 @@ class BotAsistente {
                 box-sizing: border-box;
             }
 
-            .wa-action-btn {
-                background: none;
-                border: none;
-                color: #54656f;
-                font-size: 1.4rem;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0 4px;
-                flex-shrink: 0;
-            }
-
             .wa-input-container {
                 flex: 1;
                 background: #ffffff;
                 border-radius: 22px;
                 display: flex;
                 align-items: center;
-                padding: 0 12px;
-                gap: 8px;
+                padding: 0 16px;
                 box-shadow: 0 1px 2px rgba(0,0,0,0.1);
                 min-width: 0;
                 height: 38px;
@@ -612,19 +598,11 @@ class BotAsistente {
                 flex: 1;
                 border: none;
                 outline: none;
-                font-size: 0.9rem;
+                font-size: 16px; /* Evita que Safari en iOS haga zoom automático al enfocar */
                 background: transparent;
                 padding: 8px 0;
                 color: #111;
                 min-width: 0;
-            }
-
-            .wa-inner-icon {
-                color: #54656f;
-                font-size: 1.15rem;
-                cursor: pointer;
-                flex-shrink: 0;
-                transition: opacity 0.2s;
             }
 
             .bot-send-btn {
@@ -691,13 +669,8 @@ class BotAsistente {
                     <button class="suggestion-btn" onclick="window.botInstance.sendPreset('¿Cuánto gaste en Luz este año?')">Total Luz</button>
                 </div>
                 <div class="bot-input-area">
-                    <button class="wa-action-btn wa-plus-btn" onclick="if (window.showToast) window.showToast('Adjuntar', 'Función de adjuntos no disponible.', 'error');">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
                     <div class="wa-input-container">
                         <input type="text" id="botInput" placeholder="Escribe un mensaje..." onkeypress="window.botInstance.handleKeyPress(event)" oninput="window.botInstance.handleInput(event)">
-                        <i class="fa-regular fa-face-smile wa-inner-icon wa-smile-icon"></i>
-                        <i class="fa-solid fa-camera wa-inner-icon wa-camera-icon" id="waCameraIcon"></i>
                     </div>
                     <button class="bot-send-btn wa-mic-state" id="botSendBtn" onclick="window.botInstance.submitUserMessage()">
                         <i class="fa-solid fa-microphone" id="botSendIcon"></i>
@@ -747,7 +720,6 @@ class BotAsistente {
         const text = event.target.value;
         const sendBtn = document.getElementById('botSendBtn');
         const sendIcon = document.getElementById('botSendIcon');
-        const cameraIcon = document.getElementById('waCameraIcon');
 
         if (text && text.trim().length > 0) {
             if (sendBtn) {
@@ -757,9 +729,6 @@ class BotAsistente {
             if (sendIcon) {
                 sendIcon.className = 'fa-solid fa-paper-plane';
             }
-            if (cameraIcon) {
-                cameraIcon.style.display = 'none';
-            }
         } else {
             if (sendBtn) {
                 sendBtn.classList.remove('wa-send-state');
@@ -767,9 +736,6 @@ class BotAsistente {
             }
             if (sendIcon) {
                 sendIcon.className = 'fa-solid fa-microphone';
-            }
-            if (cameraIcon) {
-                cameraIcon.style.display = 'block';
             }
         }
     }
@@ -827,19 +793,15 @@ class BotAsistente {
         this.appendMessage(text, 'user');
         input.value = '';
 
-        // Resetear el estado del botón a micrófono y volver a mostrar la cámara
+        // Resetear el estado del botón a micrófono
         const sendBtn = document.getElementById('botSendBtn');
         const sendIcon = document.getElementById('botSendIcon');
-        const cameraIcon = document.getElementById('waCameraIcon');
         if (sendBtn) {
             sendBtn.classList.remove('wa-send-state');
             sendBtn.classList.add('wa-mic-state');
         }
         if (sendIcon) {
             sendIcon.className = 'fa-solid fa-microphone';
-        }
-        if (cameraIcon) {
-            cameraIcon.style.display = 'block';
         }
 
         // Mostrar indicador de pensando (tres puntos saltarines)
