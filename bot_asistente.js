@@ -567,16 +567,6 @@ class BotAsistente {
                 cursor: pointer;
                 transition: all 0.2s;
                 flex-shrink: 0;
-            }
-
-            .bot-send-btn.wa-mic-state {
-                background: transparent;
-                color: #54656f;
-                box-shadow: none;
-                font-size: 1.25rem;
-            }
-
-            .bot-send-btn.wa-send-state {
                 background: #00a884;
                 color: white;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.15);
@@ -610,10 +600,10 @@ class BotAsistente {
                 <div class="bot-messages" id="botMessages"></div>
                 <div class="bot-input-area">
                     <div class="wa-input-container">
-                        <input type="text" id="botInput" placeholder="Escribe un mensaje..." onkeypress="window.botInstance.handleKeyPress(event)" oninput="window.botInstance.handleInput(event)">
+                        <input type="text" id="botInput" placeholder="Escribe un mensaje..." onkeypress="window.botInstance.handleKeyPress(event)">
                     </div>
-                    <button class="bot-send-btn wa-mic-state" id="botSendBtn" onclick="window.botInstance.submitUserMessage()">
-                        <i class="fa-solid fa-microphone" id="botSendIcon"></i>
+                    <button class="bot-send-btn" id="botSendBtn" onclick="window.botInstance.submitUserMessage()">
+                        <i class="fa-solid fa-paper-plane" id="botSendIcon"></i>
                     </button>
                 </div>
             </div>
@@ -656,29 +646,7 @@ class BotAsistente {
         }
     }
 
-    handleInput(event) {
-        const text = event.target.value;
-        const sendBtn = document.getElementById('botSendBtn');
-        const sendIcon = document.getElementById('botSendIcon');
 
-        if (text && text.trim().length > 0) {
-            if (sendBtn) {
-                sendBtn.classList.remove('wa-mic-state');
-                sendBtn.classList.add('wa-send-state');
-            }
-            if (sendIcon) {
-                sendIcon.className = 'fa-solid fa-paper-plane';
-            }
-        } else {
-            if (sendBtn) {
-                sendBtn.classList.remove('wa-send-state');
-                sendBtn.classList.add('wa-mic-state');
-            }
-            if (sendIcon) {
-                sendIcon.className = 'fa-solid fa-microphone';
-            }
-        }
-    }
 
     scrollToBottom() {
         const msgs = document.getElementById('botMessages');
@@ -733,16 +701,6 @@ class BotAsistente {
         this.appendMessage(text, 'user');
         input.value = '';
 
-        // Resetear el estado del botón a micrófono
-        const sendBtn = document.getElementById('botSendBtn');
-        const sendIcon = document.getElementById('botSendIcon');
-        if (sendBtn) {
-            sendBtn.classList.remove('wa-send-state');
-            sendBtn.classList.add('wa-mic-state');
-        }
-        if (sendIcon) {
-            sendIcon.className = 'fa-solid fa-microphone';
-        }
 
         // Mostrar indicador de pensando (tres puntos saltarines)
         this.showTypingIndicator();
