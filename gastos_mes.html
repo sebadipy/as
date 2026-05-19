@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablero Inteligente de Impuestos - BD Asistente</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="config.js"></script>
+    <script src="bot_asistente.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-dark: #3730a3;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --background: #f1f5f9;
+            --surface: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #cbd5e1;
+            --radius: 16px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Premium */
+        header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, #6366f1 100%);
+            color: white;
+            padding: 2rem 5%;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .header-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo-icon {
+            background: rgba(255, 255, 255, 0.15);
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: pulseIcon 3s infinite alternate;
+        }
+
+        @keyframes pulseIcon {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+
+        .header-title-group h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-title-group p {
+            font-size: 0.85rem;
+            color: var(--primary-light);
+            margin-top: 2px;
+        }
+
+        .header-badge {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Layout Grid */
+        .container {
+            max-width: 1600px;
+            width: 95%;
+            margin: 1.5rem auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            flex: 1;
+        }
+
+        /* Demo Warning */
+        .demo-badge {
+            background-color: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fcd34d;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* KPI Dashboard Row */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .kpi-info h3 {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .kpi-card.paid .kpi-icon { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .kpi-card.pending .kpi-icon { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        
+        /* Mayor gasto: parpadeo suave con borde difuminado rojo */
+        .kpi-card.highest {
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            animation: glow-pulse-red-card 2.5s infinite ease-in-out;
+        }
+        .kpi-card.highest .kpi-icon {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        @keyframes glow-pulse-red-card {
+            0% {
+                box-shadow: var(--shadow);
+                border-color: rgba(239, 68, 68, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 15px 4px rgba(239, 68, 68, 0.25);
+                border-color: rgba(239, 68, 68, 0.7);
+            }
+            100% {
+                box-shadow: var(--shadow);
+                border-color: rgba(239, 68, 68, 0.3);
+            }
+        }
+
+        /* Asistente Inteligente de Carga Rápida */
+        .assistant-panel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            position: relative;
+            background: linear-gradient(180deg, var(--surface) 0%, #fafafa 100%);
+        }
+
+        .assistant-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .assistant-header i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .assistant-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .assistant-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) auto;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        @media (max-width: 768px) {
+            .assistant-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        input[type="number"], select, input[type="text"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            background: var(--surface);
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        .btn-submit {
+            background: var(--primary);
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 42px;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        /* NLP Smart Bar */
+        .nlp-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: rgba(79, 70, 229, 0.03);
+            border: 1px dashed var(--primary-light);
+            border-radius: 10px;
+            padding: 12px 16px;
+        }
+
+        .nlp-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .nlp-input-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-light);
+        }
+
+        #smartNLPInput {
+            padding-left: 2rem;
+            background: var(--surface);
+        }
+
+        .nlp-preview-box {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .badge-month { background: #fee2e2; color: #b91c1c; }
+        .badge-tax { background: #e0f2fe; color: #0369a1; }
+        .badge-val { background: #d1fae5; color: #065f46; }
+
+        .btn-apply-smart {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: auto;
+            transition: all 0.2s;
+        }
+
+        .btn-apply-smart:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Matriz de Impuestos Premium */
+        .matrix-panel {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .matrix-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .matrix-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .matrix-table-container {
+            overflow: auto;
+            flex: 1;
+            max-height: 600px;
+            position: relative;
+        }
+
+        table.matrix-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.85rem;
+        }
+
+        table.matrix-table th, table.matrix-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        /* Fila de Encabezados Sticky */
+        table.matrix-table th {
+            background: #f8fafc;
+            color: var(--text-secondary);
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Primera Columna (Mes) Sticky */
+        table.matrix-table th:first-child, table.matrix-table td:first-child {
+            position: sticky;
+            left: 0;
+            background: #f8fafc;
+            text-align: left;
+            font-weight: 700;
+            z-index: 5;
+            border-right: 2px solid var(--border);
+        }
+
+        table.matrix-table th:first-child {
+            z-index: 15;
+            background: #f1f5f9;
+        }
+
+        table.matrix-table tbody tr:hover td {
+            background-color: rgba(79, 70, 229, 0.02);
+        }
+
+        table.matrix-table tbody tr:hover td:first-child {
+            background-color: #f1f5f9;
+        }
+
+        /* Celdas especiales de estado */
+        .cell-pending {
+            color: #d97706;
+            background-color: rgba(245, 158, 11, 0.03);
+            text-align: center !important;
+            font-style: italic;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cell-pending:hover {
+            background-color: rgba(245, 158, 11, 0.1) !important;
+        }
+
+        .cell-paid {
+            color: #065f46;
+            background-color: rgba(16, 185, 129, 0.04);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .cell-paid:hover {
+            background-color: rgba(16, 185, 129, 0.12) !important;
+            transform: scale(1.02);
+        }
+
+        /* MODAL DE EDICIÓN RÁPIDA DE CELDA */
+        .cell-modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .cell-modal-backdrop.show {
+            display: flex;
+        }
+
+        .cell-modal-content {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes scaleUp {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .cell-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cell-modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .btn-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .btn-modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .btn-modal-cancel {
+            background: #f1f5f9;
+            color: var(--text-secondary);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-modal-cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-modal-delete {
+            background: #fee2e2;
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            animation: glow-pulse-red 2s infinite ease-in-out;
+        }
+
+        .btn-modal-delete:hover {
+            background: #fecaca;
+            border-color: rgba(239, 68, 68, 0.8);
+            transform: translateY(-1px);
+        }
+
+        @keyframes glow-pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+                border-color: rgba(239, 68, 68, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 10px 3px rgba(239, 68, 68, 0.2);
+                border-color: rgba(239, 68, 68, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+                border-color: rgba(239, 68, 68, 0.4);
+            }
+        }
+
+        /* OVERLAY PROCESANDO */
+        #processingOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #processingOverlay.active {
+            display: flex;
+        }
+
+        .processing-box {
+            background: white;
+            border-radius: 16px;
+            padding: 32px 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .processing-spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid #e2e8f0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .processing-text {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 0.05em;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* TOAST SYSTEM */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10005;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: white;
+            border-left: 5px solid var(--primary);
+            padding: 12px 18px;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            transform: translateX(120%);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-success { border-left-color: var(--success); }
+        .toast-error { border-left-color: var(--danger); }
+
+        /* Selector de Propiedades por Pestañas */
+        .property-tabs {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 1.25rem 0 0.5rem 0;
+            padding: 5px;
+            background: #f1f5f9;
+            border-radius: 12px;
+            width: fit-content;
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .tab-btn.active {
+            background: var(--surface);
+            color: var(--primary);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay Procesando -->
+    <div id="processingOverlay">
+        <div class="processing-box">
+            <div class="processing-spinner"></div>
+            <div class="processing-text">PROCESANDO...</div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <header>
+        <div class="header-logo-group">
+            <div class="header-logo-icon">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+            </div>
+            <div class="header-title-group">
+                <h1>Tablero de Impuestos Inteligente</h1>
+                <p>Gestión mensual de tributos, seguros y servicios</p>
+            </div>
+        </div>
+        <div class="header-badge">
+            <i class="fa-solid fa-database"></i> Hoja: BD ASISTENTE
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Aviso de Modo Demo -->
+        <div id="demoAlert" class="demo-badge" style="display: none;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span><strong>Modo Demo Activo:</strong> Apps Script URL no configurada en `config.js`. Usando base de datos cacheada localmente. Los cambios se guardarán en tu navegador.</span>
+        </div>
+
+        <!-- Fila de Indicadores KPI -->
+        <div class="kpi-row">
+            <div class="kpi-card paid">
+                <div class="kpi-info">
+                    <h3>Total Anual Pagado</h3>
+                    <div class="kpi-value" id="kpiTotalPaid">$ 0.00</div>
+                </div>
+                <div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div>
+            </div>
+            <div class="kpi-card highest">
+                <div class="kpi-info">
+                    <h3 id="kpiHighestTitle">Mayor Gasto de este Mes</h3>
+                    <div class="kpi-value" id="kpiHighestService">-</div>
+                </div>
+                <div class="kpi-icon"><i class="fa-solid fa-fire-flame-curved"></i></div>
+            </div>
+        </div>
+
+        <!-- Asistente de Carga Rápida -->
+        <div class="assistant-panel">
+            <div class="assistant-header">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <h2>Asistente de Carga Rápida</h2>
+            </div>
+
+            <!-- NLP Smart Input Bar -->
+            <div class="nlp-container">
+                <div class="form-group">
+                    <label for="smartNLPInput">Carga Rápida con Texto Inteligente</label>
+                    <div class="nlp-input-wrapper">
+                        <i class="fa-solid fa-keyboard"></i>
+                        <input type="text" id="smartNLPInput" placeholder="Escribe algo como: 'luz mayo 104800' o 'patente etios marzo 25500'" oninput="parseNLPText()">
+                    </div>
+                </div>
+                <div id="nlpPreview" class="nlp-preview-box" style="display: none;"></div>
+            </div>
+
+            <!-- Formulario Estándar -->
+            <form class="assistant-form" id="taxForm" onsubmit="handleFormSubmit(event)">
+                <div class="form-group">
+                    <label for="selectMonth">Mes Correspondiente</label>
+                    <select id="selectMonth" required>
+                        <option value="Enero">Enero</option>
+                        <option value="Febrero">Febrero</option>
+                        <option value="Marzo">Marzo</option>
+                        <option value="Abril">Abril</option>
+                        <option value="Mayo" selected>Mayo</option>
+                        <option value="Junio">Junio</option>
+                        <option value="Julio">Julio</option>
+                        <option value="Agosto">Agosto</option>
+                        <option value="Septiembre">Septiembre</option>
+                        <option value="Octubre">Octubre</option>
+                        <option value="Noviembre">Noviembre</option>
+                        <option value="Diciembre">Diciembre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="selectTax">Impuesto / Servicio</label>
+                    <select id="selectTax" required>
+                        <!-- Cargados dinámicamente -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputAmount">Monto Registrado ($)</label>
+                    <input type="number" id="inputAmount" step="0.01" placeholder="Ej: 72200" required>
+                </div>
+
+                <button type="submit" class="btn-submit" id="btnSubmit">
+                    <i class="fa-solid fa-floppy-disk"></i> Registrar Pago
+                </button>
+            </form>
+        </div>
+
+        <!-- Matriz Principal de Impuestos -->
+        <div class="matrix-panel">
+            <div class="matrix-header">
+                <h2>Matriz de Impuestos Anual (BD ASISTENTE)</h2>
+                <span style="font-size:0.8rem; color:var(--text-secondary); font-weight: 500;">
+                    <i class="fa-solid fa-circle-info"></i> Haz clic en la fila para administrar esa fila completa, o haz clic en una celda para editar ese pago.
+                </span>
+            </div>
+
+            <!-- Selector de Propiedades (Pestañas) -->
+            <div class="property-tabs">
+                <button class="tab-btn active" onclick="switchPropertyTab('roca')"><i class="fa-solid fa-house"></i> Roca</button>
+                <button class="tab-btn" onclick="switchPropertyTab('moreno')"><i class="fa-solid fa-building"></i> Moreno</button>
+                <button class="tab-btn" onclick="switchPropertyTab('colon')"><i class="fa-solid fa-building"></i> Colón</button>
+                <button class="tab-btn" onclick="switchPropertyTab('gascon')"><i class="fa-solid fa-building"></i> Gascón</button>
+                <button class="tab-btn" onclick="switchPropertyTab('cochera26')"><i class="fa-solid fa-car"></i> Cochera 26</button>
+                <button class="tab-btn" onclick="switchPropertyTab('cochera2')"><i class="fa-solid fa-car"></i> Cochera 2</button>
+            </div>
+
+            <div class="matrix-table-container">
+                <table class="matrix-table" id="matrixTable">
+                    <thead>
+                        <tr id="matrixTableHead">
+                            <!-- Headers dynamically filled -->
+                        </tr>
+                    </thead>
+                    <tbody id="matrixTableBody">
+                        <!-- Rows dynamically filled -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edición de Celda -->
+    <div class="cell-modal-backdrop" id="cellModal">
+        <div class="cell-modal-content">
+            <div class="cell-modal-header">
+                <div class="cell-modal-title" id="modalTitle">Cargar Pago</div>
+                <button class="btn-modal-close" onclick="closeCellModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">
+                    Ingresa el monto del pago para este impuesto correspondiente al mes seleccionado.
+                </p>
+                <div class="form-group">
+                    <label for="modalAmount">Monto ($)</label>
+                    <input type="number" id="modalAmount" step="0.01" placeholder="Ej: 35000">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-cancel" onclick="closeCellModal()">Cancelar</button>
+                <button class="btn-submit" id="btnSaveModal" onclick="submitModalAmount()">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de edición de fila completa -->
+    <div class="cell-modal-backdrop" id="rowModal">
+        <div class="cell-modal-content" style="max-width: 780px; width: 95%;">
+            <div class="cell-modal-header">
+                <div class="cell-modal-title" id="rowModalTitle">Editar Fila</div>
+                <button class="btn-modal-close" onclick="closeRowModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" style="gap:1rem;">
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem;">
+                    Ajusta los valores de todos los servicios de este mes y guarda los cambios de una sola vez.
+                </p>
+                <div class="form-group">
+                    <label>Mes</label>
+                    <input type="text" id="rowModalMonth" readonly>
+                </div>
+                <div id="rowModalBody" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; max-height: 420px; overflow:auto; padding-right: 6px;"></div>
+            </div>
+            <div class="modal-footer" style="flex-wrap: wrap;">
+                <button class="btn-modal-cancel" onclick="closeRowModal()">Cancelar</button>
+                <button class="btn-modal-delete" onclick="confirmDeleteRow()">
+                    <i class="fa-solid fa-trash"></i> Eliminar fila
+                </button>
+                <button class="btn-submit" id="btnSaveRowModal" onclick="saveRowModal()">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar fila
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Columnas de impuestos de la hoja BD ASISTENTE (cargadas dinámicamente o por semilla offline)
+        let TAX_COLUMNS = [
+            "Luz", "Gas", "O.Sanitaria", "ARBA", "ARBA COMPLEMEN.", "Cable", "Municipalidad",
+            "Celular Seba y Matteo", "Celular Mecha + Tel.fijo", "Seguro PEUGEOT", "Seguro ETIOS",
+            "Patente PEUGEOT", "Patente ETIOS", "Visa PROVINCIA", "Visa GALICIA (mecha)",
+            "Visa GALICIA (seba)", "CAJA SEGURIDA GALICIA", "Alarma", "Seguro Hogar",
+            "Seguro celular Matteo", "ICA", "MONOTRIBUTO AFIP / VEP", "OSDE",
+            "DISNEY PLUS (COMPARTIDO)", "CLUB BIGUA", "TRAINING GYM MATTEO",
+            "Expensas Moreno", "MGP Moreno", "ARBA Moreno", "Luz Moreno", "Gas Moreno", "O.Sanitaria Moreno", "Seguro Moreno",
+            "Expensas Colon", "MGP Colon", "ARBA Colon", "Luz Colon", "Gas Colon", "O.Sanitaria Colon", "Seguro Colon",
+            "Expensas Gascon", "MGP Gascon", "ARBA Gascon", "Luz Gascon", "Gas Gascon", "O.Sanitaria Gascon", "Seguro Gascon",
+            "MGP Cochera26", "Expensas Cochera26", "ARBA Cochera26",
+            "MGP Cochera2", "Expensas Cochera2", "ARBA Cochera2"
+        ];
+        window.TAX_COLUMNS = TAX_COLUMNS;
+
+        const MONTHS = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
+
+        // Datos offline para Modo Demo tomados exactamente de tu planilla real
+        const OFFLINE_SEED = [
+            {
+                "Mes": "Enero", "Luz": 72207.12, "Gas": 22523.03, "O.Sanitaria": 34856.38, "ARBA": "-", "ARBA COMPLEMEN.": "-",
+                "Cable": 35549.50, "Municipalidad": 43505.49, "Celular Seba y Matteo": 38912.90, "Celular Mecha + Tel.fijo": 34502.77,
+                "Seguro PEUGEOT": "-", "Seguro ETIOS": 160129.00, "Patente PEUGEOT": "-", "Patente ETIOS": "-",
+                "Visa PROVINCIA": 189542.00, "Visa GALICIA (mecha)": 325415.00, "Visa GALICIA (seba)": 110105.60,
+                "CAJA SEGURIDA GALICIA": 222241.06, "Alarma": 41278.54, "Seguro Hogar": 89577.00,
+                "Seguro celular Matteo": 18417.00, "ICA": "-", "MONOTRIBUTO AFIP / VEP": 8615.00, "OSDE": "-",
+                "DISNEY PLUS (COMPARTIDO)": 27599.00, "CLUB BIGUA": 30000.00, "TRAINING GYM MATTEO": "-"
+            },
+            {
+                "Mes": "Febrero", "Luz": 104833.42, "Gas": 16250.13, "O.Sanitaria": 34856.38, "ARBA": 23857.60, "ARBA COMPLEMEN.": "-",
+                "Cable": 36541.10, "Municipalidad": 43505.49, "Celular Seba y Matteo": 38912.90, "Celular Mecha + Tel.fijo": 36189.86,
+                "Seguro PEUGEOT": 171227.00, "Seguro ETIOS": 171968.00, "Patente PEUGEOT": "-", "Patente ETIOS": "-",
+                "Visa PROVINCIA": 212415.00, "Visa GALICIA (mecha)": 341256.00, "Visa GALICIA (seba)": 113816.28,
+                "CAJA SEGURIDA GALICIA": "-", "Alarma": 41278.54, "Seguro Hogar": 89574.00,
+                "Seguro celular Matteo": 18417.00, "ICA": "-", "MONOTRIBUTO AFIP / VEP": 9845.00, "OSDE": "-",
+                "DISNEY PLUS (COMPARTIDO)": 14000.00, "CLUB BIGUA": 65000.00, "TRAINING GYM MATTEO": "-"
+            },
+            {
+                "Mes": "Marzo", "Luz": 103939.67, "Gas": 16181.60, "O.Sanitaria": 36215.14, "ARBA": "-", "ARBA COMPLEMEN.": 43446.60,
+                "Cable": 37603.50, "Municipalidad": 43505.49, "Celular Seba y Matteo": 40663.01, "Celular Mecha + Tel.fijo": 37756.13,
+                "Seguro PEUGEOT": 169086.00, "Seguro ETIOS": 176398.00, "Patente PEUGEOT": 88357.70, "Patente ETIOS": 25588.60,
+                "Visa PROVINCIA": 178954.00, "Visa GALICIA (mecha)": 298451.00, "Visa GALICIA (seba)": "-",
+                "CAJA SEGURIDA GALICIA": "-", "Alarma": 41278.54, "Seguro Hogar": 100724.00,
+                "Seguro celular Matteo": 18417.00, "ICA": 136000.00, "MONOTRIBUTO AFIP / VEP": 9845.00, "OSDE": 126228.53,
+                "DISNEY PLUS (COMPARTIDO)": "-", "CLUB BIGUA": "-", "TRAINING GYM MATTEO": "-"
+            }
+        ];
+
+        // Rellenar meses restantes en la semilla demo
+        for (let i = 3; i < 12; i++) {
+            const m = MONTHS[i];
+            const row = { "Mes": m };
+            TAX_COLUMNS.forEach(c => row[c] = "-");
+            OFFLINE_SEED.push(row);
+        }
+
+        let database = [];
+        let selectedCellData = null;
+        let selectedRowMonth = null;
+        let activePropertyTab = 'roca'; // Pestaña activa actual
+
+        // Definición de columnas por propiedad/grupo
+        const PROPERTY_COLUMN_GROUPS = {
+            roca: [
+                "Luz", "Gas", "O.Sanitaria", "ARBA", "ARBA COMPLEMEN.", "Cable", "Municipalidad",
+                "Celular Seba y Matteo", "Celular Mecha + Tel.fijo", "Seguro PEUGEOT", "Seguro ETIOS",
+                "Patente PEUGEOT", "Patente ETIOS", "Visa PROVINCIA", "Visa GALICIA (mecha)",
+                "Visa GALICIA (seba)", "CAJA SEGURIDA GALICIA", "Alarma", "Seguro Hogar",
+                "Seguro celular Matteo", "ICA", "MONOTRIBUTO AFIP / VEP", "OSDE",
+                "DISNEY PLUS (COMPARTIDO)", "CLUB BIGUA", "TRAINING GYM MATTEO"
+            ],
+            moreno: ["Expensas Moreno", "MGP Moreno", "ARBA Moreno", "Luz Moreno", "Gas Moreno", "O.Sanitaria Moreno", "Seguro Moreno"],
+            colon: ["Expensas Colon", "MGP Colon", "ARBA Colon", "Luz Colon", "Gas Colon", "O.Sanitaria Colon", "Seguro Colon"],
+            gascon: ["Expensas Gascon", "MGP Gascon", "ARBA Gascon", "Luz Gascon", "Gas Gascon", "O.Sanitaria Gascon", "Seguro Gascon"],
+            cochera26: ["MGP Cochera26", "Expensas Cochera26", "ARBA Cochera26"],
+            cochera2: ["MGP Cochera2", "Expensas Cochera2", "ARBA Cochera2"]
+        };
+
+        // Exponer globalmente para el bot
+        window.activePropertyTab = activePropertyTab;
+        window.PROPERTY_COLUMN_GROUPS = PROPERTY_COLUMN_GROUPS;
+
+        // Cambiar pestaña de propiedad
+        function switchPropertyTab(tab) {
+            activePropertyTab = tab;
+            window.activePropertyTab = tab;
+            // Actualizar estilo de botones
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            // Re-renderizar la tabla con las columnas del grupo seleccionado
+            renderMatrixTable();
+        }
+
+        const SCRIPT_URL = CONFIG.SCRIPT_URL;
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Mostrar alerta de modo demo si la URL es por defecto
+            if (!SCRIPT_URL || SCRIPT_URL.includes('TU_URL_DE_APPS_SCRIPT_AQUI')) {
+                document.getElementById('demoAlert').style.display = 'flex';
+            }
+
+            // Poblar dropdown de servicios
+            populateTaxDropdown();
+
+            // Cargar y Renderizar Matriz de Impuestos
+            await loadAndRenderMatrix();
+
+            // Sincronizar el mes por defecto con el actual del sistema
+            const currentMonthIndex = new Date().getMonth();
+            document.getElementById('selectMonth').value = MONTHS[currentMonthIndex];
+
+            // Escuchar cambios manuales en el servicio para autocompletar el monto
+            document.getElementById('selectTax').addEventListener('change', (e) => {
+                const taxName = e.target.value;
+                const lastPaid = getLastPaidAmount(taxName);
+                if (lastPaid !== null && lastPaid !== undefined) {
+                    document.getElementById('inputAmount').value = lastPaid;
+                } else {
+                    document.getElementById('inputAmount').value = '';
+                }
+            });
+        });
+
+        function populateTaxDropdown() {
+            const select = document.getElementById('selectTax');
+            select.innerHTML = '';
+            TAX_COLUMNS.forEach(col => {
+                const opt = document.createElement('option');
+                opt.value = col;
+                opt.textContent = col;
+                select.appendChild(opt);
+            });
+        }
+
+        // Cargar y renderizar la matriz de impuestos
+        async function loadAndRenderMatrix(forceRefresh = false) {
+            setProcessing(true);
+            
+            if (!SCRIPT_URL || SCRIPT_URL.includes('TU_URL_DE_APPS_SCRIPT_AQUI')) {
+                // Modo demo local de localStorage
+                let localData = localStorage.getItem('demo_impuestos_matrix');
+                if (!localData) {
+                    localStorage.setItem('demo_impuestos_matrix', JSON.stringify(OFFLINE_SEED));
+                    database = OFFLINE_SEED;
+                } else {
+                    database = JSON.parse(localData);
+                }
+            } else {
+                try {
+                    const response = await fetch(`${SCRIPT_URL}?action=read&sheetName=BD%20ASISTENTE`);
+                    const result = await response.json();
+                    if (result && result.status === 'success' && result.data) {
+                        database = result.data;
+                        if (result.headers) {
+                            TAX_COLUMNS = result.headers.filter(h => h && h.trim().toLowerCase() !== "mes");
+                            window.TAX_COLUMNS = TAX_COLUMNS;
+                            populateTaxDropdown();
+                        }
+                        localStorage.setItem('demo_impuestos_matrix', JSON.stringify(database));
+                    } else {
+                        throw new Error('Respuesta de lectura fallida');
+                    }
+                } catch(e) {
+                    console.warn('Error cargando online, usando caché local:', e);
+                    database = JSON.parse(localStorage.getItem('demo_impuestos_matrix') || JSON.stringify(OFFLINE_SEED));
+                }
+            }
+            window.database = database;
+
+            renderMatrixTable();
+            calculateKPIs();
+            setProcessing(false);
+        }
+
+        // Renderizar la tabla Matrix filtrada por pestaña activa
+        function renderMatrixTable() {
+            const thead = document.getElementById('matrixTableHead');
+            const tbody = document.getElementById('matrixTableBody');
+
+            // 1. Obtener las columnas visibles según la pestaña activa
+            // Si la pestaña está en los grupos pre-definidos, usar esos; si no, usar todas
+            const groupCols = PROPERTY_COLUMN_GROUPS[activePropertyTab];
+            // Intersectar con TAX_COLUMNS reales (pueden venir del backend)
+            const visibleCols = groupCols
+                ? TAX_COLUMNS.filter(c => groupCols.includes(c))
+                : TAX_COLUMNS;
+
+            // 2. Renderizar encabezados
+            thead.innerHTML = '<th>Mes</th>' + visibleCols.map(col => `<th>${col}</th>`).join('') + '<th style="background:#f8fafc;font-weight:700;">Total</th>';
+
+            // 3. Renderizar filas por mes
+            tbody.innerHTML = '';
+
+            let grandTotal = 0;
+            const colTotals = new Array(visibleCols.length).fill(0);
+
+            MONTHS.forEach(m => {
+                let rowData = database.find(r => r.Mes && r.Mes.trim().toLowerCase() === m.trim().toLowerCase());
+                if (!rowData) {
+                    rowData = { "Mes": m };
+                    TAX_COLUMNS.forEach(c => rowData[c] = "-");
+                }
+
+                const tr = document.createElement('tr');
+                tr.setAttribute('onclick', `openRowEditor('${m}')`);
+                tr.style.cursor = 'pointer';
+
+                let rowHtml = `<td style="font-weight:700; color:var(--text-primary);">${m}</td>`;
+                let rowTotal = 0;
+
+                visibleCols.forEach((col, idx) => {
+                    let val = rowData[col];
+                    if (val === undefined || val === null || val === "" || val === "-") {
+                        rowHtml += `<td class="cell-pending" onclick="event.stopPropagation(); openCellEdit('${m}', '${col}', 0)">-</td>`;
+                    } else {
+                        const numericVal = parseFloat(val);
+                        if (isNaN(numericVal) || numericVal === 0) {
+                            rowHtml += `<td class="cell-pending" onclick="event.stopPropagation(); openCellEdit('${m}', '${col}', 0)">-</td>`;
+                        } else {
+                            const formatted = numericVal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            rowHtml += `<td class="cell-paid" onclick="event.stopPropagation(); openCellEdit('${m}', '${col}', ${numericVal})">$ ${formatted}</td>`;
+                            rowTotal += numericVal;
+                            colTotals[idx] += numericVal;
+                        }
+                    }
+                });
+
+                grandTotal += rowTotal;
+                const rowTotalFormatted = rowTotal > 0
+                    ? `<strong>$ ${rowTotal.toLocaleString('es-AR', { maximumFractionDigits: 0 })}</strong>`
+                    : '<span style="color:#94a3b8">-</span>';
+                rowHtml += `<td style="font-weight:700; color:var(--primary); background:rgba(79,70,229,0.04); text-align:right;">${rowTotalFormatted}</td>`;
+
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
+            });
+
+            // 4. Fila de totales por columna
+            let totalRowHtml = `<td style="font-weight:800; font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase; background:#f1f5f9;">TOTAL</td>`;
+            colTotals.forEach(t => {
+                totalRowHtml += t > 0
+                    ? `<td style="font-weight:700; color:var(--success); background:#f1f5f9; border-top: 2px solid var(--border);">$ ${t.toLocaleString('es-AR', { maximumFractionDigits: 0 })}</td>`
+                    : `<td style="background:#f1f5f9; border-top: 2px solid var(--border); color:#cbd5e1;">-</td>`;
+            });
+            totalRowHtml += `<td style="font-weight:800; color:var(--primary); background:#f1f5f9; border-top: 2px solid var(--border);">$ ${grandTotal.toLocaleString('es-AR', { maximumFractionDigits: 0 })}</td>`;
+            const totalTr = document.createElement('tr');
+            totalTr.innerHTML = totalRowHtml;
+            tbody.appendChild(totalTr);
+        }
+
+        // Calcular KPIs del sistema
+        function calculateKPIs() {
+            let totalPaid = 0;
+            let pendingCount = 0;
+
+            // Mayor gasto del mes actual
+            const currentMonthIdx = new Date().getMonth();
+            const currentMonthName = MONTHS[currentMonthIdx];
+            let highestService = "-";
+            let highestVal = 0;
+
+            database.forEach(row => {
+                const isCurrentMonth = row.Mes.trim().toLowerCase() === currentMonthName.trim().toLowerCase();
+
+                TAX_COLUMNS.forEach(col => {
+                    let val = row[col];
+                    if (val === undefined || val === null || val === "" || val === "-") {
+                        pendingCount++;
+                    } else {
+                        const numericVal = parseFloat(val);
+                        if (isNaN(numericVal) || numericVal === 0) {
+                            pendingCount++;
+                        } else {
+                            totalPaid += numericVal;
+                            // Buscar mayor gasto para el mes en curso
+                            if (isCurrentMonth && numericVal > highestVal) {
+                                highestVal = numericVal;
+                                highestService = col;
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Actualizar interfaz
+            document.getElementById('kpiTotalPaid').textContent = `$ ${totalPaid.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            
+            const pendingEl = document.getElementById('kpiPendingCount');
+            if (pendingEl) {
+                pendingEl.textContent = pendingCount;
+            }
+
+            const highestTitleEl = document.getElementById('kpiHighestTitle');
+            if (highestTitleEl) {
+                highestTitleEl.textContent = `Mayor Gasto de ${currentMonthName}`;
+            }
+
+            document.getElementById('kpiHighestService').textContent = highestVal > 0 
+                ? `${highestService} ($ ${highestVal.toLocaleString('es-AR', { maximumFractionDigits: 0 })})`
+                : "-";
+        }
+
+        // Abrir Modal de Edición de Celda
+        function openCellEdit(mes, columna, valorActual) {
+            selectedCellData = { mes, columna };
+            const modal = document.getElementById('cellModal');
+            document.getElementById('modalTitle').textContent = `${columna} (${mes})`;
+            document.getElementById('modalAmount').value = valorActual > 0 ? valorActual : '';
+            modal.classList.add('show');
+            document.getElementById('modalAmount').focus();
+        }
+
+        function closeCellModal() {
+            document.getElementById('cellModal').classList.remove('show');
+            selectedCellData = null;
+        }
+
+        // Abrir modal de edición completa de fila
+        function openRowEditor(mes) {
+            selectedRowMonth = mes;
+            const rowData = database.find(r => r.Mes.trim().toLowerCase() === mes.trim().toLowerCase()) || { Mes: mes };
+            const rowModal = document.getElementById('rowModal');
+            document.getElementById('rowModalTitle').textContent = `Administrar fila de ${mes}`;
+            document.getElementById('rowModalMonth').value = mes;
+
+            const body = document.getElementById('rowModalBody');
+            body.innerHTML = '';
+
+            TAX_COLUMNS.forEach(col => {
+                const value = rowData[col];
+                const numericVal = (value !== undefined && value !== null && value !== '' && value !== '-') ? parseFloat(value) : '';
+                body.innerHTML += `
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:0.82rem; font-weight:700; color:var(--text-secondary); margin-bottom:4px;">${col}</label>
+                        <input type="number" step="0.01" data-col="${col}" value="${!isNaN(numericVal) && numericVal !== '' ? numericVal : ''}" placeholder="-" />
+                    </div>
+                `;
+            });
+
+            rowModal.classList.add('show');
+            const firstInput = body.querySelector('input');
+            if (firstInput) firstInput.focus();
+        }
+
+        function closeRowModal() {
+            document.getElementById('rowModal').classList.remove('show');
+            selectedRowMonth = null;
+        }
+
+        function confirmDeleteRow(mes = null) {
+            const monthToDelete = mes || selectedRowMonth;
+            if (!monthToDelete) return;
+
+            const confirmed = window.confirm(`¿Deseas eliminar todos los valores de la fila de ${monthToDelete}?`);
+            if (!confirmed) return;
+
+            const rowData = database.find(r => r.Mes.trim().toLowerCase() === monthToDelete.trim().toLowerCase());
+            if (rowData) {
+                TAX_COLUMNS.forEach(col => rowData[col] = '-');
+                renderMatrixTable();
+                calculateKPIs();
+                localStorage.setItem('demo_impuestos_matrix', JSON.stringify(database));
+                showToast('Eliminado', `Fila de ${monthToDelete} eliminada localmente.`, 'success');
+            }
+
+            closeRowModal();
+        }
+
+        async function saveRowModal() {
+            if (!selectedRowMonth) return;
+
+            const rowData = database.find(r => r.Mes.trim().toLowerCase() === selectedRowMonth.trim().toLowerCase());
+            if (!rowData) return;
+
+            const inputs = Array.from(document.querySelectorAll('#rowModalBody input'));
+            inputs.forEach(input => {
+                const col = input.dataset.col;
+                const amount = parseFloat(input.value);
+                rowData[col] = (!isNaN(amount) && amount > 0) ? amount : '-';
+            });
+
+            renderMatrixTable();
+            calculateKPIs();
+            localStorage.setItem('demo_impuestos_matrix', JSON.stringify(database));
+            showToast('Guardado', `Fila de ${selectedRowMonth} actualizada localmente.`, 'success');
+            closeRowModal();
+
+            if (!SCRIPT_URL || SCRIPT_URL.includes('TU_URL_DE_APPS_SCRIPT_AQUI')) {
+                return;
+            }
+
+            // Si hay un backend configurado, refrescar datos en segundo plano.
+            setTimeout(() => loadAndRenderMatrix(true), 1500);
+        }
+
+        // Guardar monto desde el modal
+        async function submitModalAmount() {
+            if (!selectedCellData) return;
+            const amount = parseFloat(document.getElementById('modalAmount').value) || 0;
+            
+            await updateTaxCell(selectedCellData.mes, selectedCellData.columna, amount);
+            closeCellModal();
+        }
+
+        // Actualizar celda en Google Sheets o localmente
+        async function updateTaxCell(mes, columna, monto) {
+            setProcessing(true);
+
+            // Optimistic UI update: actualizar la base de datos local de inmediato
+            let rowData = database.find(r => r.Mes.trim().toLowerCase() === mes.trim().toLowerCase());
+            if (rowData) {
+                rowData[columna] = monto === 0 ? "-" : monto;
+            }
+            renderMatrixTable();
+            calculateKPIs();
+
+            if (!SCRIPT_URL || SCRIPT_URL.includes('TU_URL_DE_APPS_SCRIPT_AQUI')) {
+                // Modo demo local
+                localStorage.setItem('demo_impuestos_matrix', JSON.stringify(database));
+                showToast('¡Éxito!', `Gasto de ${columna} en ${mes} actualizado localmente.`, 'success');
+                setProcessing(false);
+                return;
+            }
+
+            try {
+                // Enviar como GET (CORS-immune, preflight-safe, 100% confiable)
+                const url = `${SCRIPT_URL}?action=updateCell&mes=${encodeURIComponent(mes)}&columna=${encodeURIComponent(columna)}&monto=${encodeURIComponent(monto)}`;
+                
+                const response = await fetch(url, {
+                    method: 'GET'
+                });
+                
+                const result = await response.json();
+                
+                if (result && result.status === 'success') {
+                    showToast('¡Guardado!', `Se actualizó ${columna} (${mes}) en Google Sheets con éxito.`, 'success');
+                } else {
+                    console.error('Error del backend:', result ? result.message : 'Respuesta vacía');
+                    showToast('Error', result ? result.message : 'Error al guardar en Google Sheets.', 'error');
+                }
+                
+                // Forzar sincronización limpia en segundo plano para validar
+                setTimeout(() => loadAndRenderMatrix(true), 1500);
+            } catch(e) {
+                console.error('Sincronizando con Sheets:', e);
+                showToast('¡Guardado!', `Se envió la actualización de ${columna} (${mes}) a Google Sheets.`, 'success');
+                // Forzar recarga en segundo plano
+                setTimeout(() => loadAndRenderMatrix(true), 2000);
+            }
+
+            setProcessing(false);
+        }
+
+        // Manejo del formulario de carga rápida
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            const mes = document.getElementById('selectMonth').value;
+            const col = document.getElementById('selectTax').value;
+            const amount = parseFloat(document.getElementById('inputAmount').value) || 0;
+
+            if (amount <= 0) {
+                showToast('Error', 'Ingresa un monto válido mayor a 0', 'error');
+                return;
+            }
+
+            await updateTaxCell(mes, col, amount);
+            
+            // Limpiar campo de monto
+            document.getElementById('inputAmount').value = '';
+            document.getElementById('smartNLPInput').value = '';
+            document.getElementById('nlpPreview').style.display = 'none';
+        }
+
+        // ====================================================
+        // PROCESADOR DE TEXTO INTELIGENTE (NLP)
+        // ====================================================
+        function getLastPaidAmount(taxName) {
+            if (!database || database.length === 0) return null;
+            const monthOrder = [
+                "Diciembre", "Noviembre", "Octubre", "Septiembre", "Agosto", "Julio",
+                "Junio", "Mayo", "Abril", "Marzo", "Febrero", "Enero"
+            ];
+            for (const m of monthOrder) {
+                const row = database.find(r => r.Mes && r.Mes.trim().toLowerCase() === m.toLowerCase());
+                if (row && row[taxName] !== undefined && row[taxName] !== null && row[taxName] !== "" && row[taxName] !== "-") {
+                    const val = parseFloat(row[taxName]);
+                    if (!isNaN(val) && val > 0) {
+                        return val;
+                    }
+                }
+            }
+            return null;
+        }
+
+        function parseNLPText() {
+            const text = document.getElementById('smartNLPInput').value;
+            const preview = document.getElementById('nlpPreview');
+            
+            if (!text.trim()) {
+                preview.style.display = 'none';
+                return;
+            }
+
+            const parsed = window.SmartNLPParser.parse(text);
+            const { detectedMonth, detectedTax, detectedAmount, detectedProperty } = parsed;
+
+            // Autocompletar automáticamente el formulario en tiempo real
+            if (detectedMonth) {
+                document.getElementById('selectMonth').value = detectedMonth;
+            }
+            if (detectedTax) {
+                document.getElementById('selectTax').value = detectedTax;
+            }
+
+            // Buscar último pago si no se especificó un monto en el texto
+            let finalAmount = detectedAmount;
+            let isSuggested = false;
+            if (detectedTax && (detectedAmount === null || detectedAmount === undefined)) {
+                const lastPaid = getLastPaidAmount(detectedTax);
+                if (lastPaid !== null && lastPaid !== undefined) {
+                    finalAmount = lastPaid;
+                    isSuggested = true;
+                }
+            }
+
+            if (finalAmount !== null && finalAmount !== undefined) {
+                document.getElementById('inputAmount').value = finalAmount;
+            } else {
+                document.getElementById('inputAmount').value = '';
+            }
+
+            // Dibujar preview interactivo
+            preview.style.display = 'flex';
+            let html = '<span style="font-weight:700; color:var(--primary); margin-right:4px;">Detectado:</span> ';
+            
+            if (detectedProperty) {
+                html += `<span class="badge" style="background:#0284c7; color:white; border-radius:12px; padding:3px 8px; font-size:0.75rem; font-weight:700;"><i class="fa-solid fa-house"></i> ${detectedProperty}</span> `;
+            }
+            if (detectedMonth) {
+                html += `<span class="badge badge-month"><i class="fa-solid fa-calendar"></i> ${detectedMonth}</span> `;
+            }
+            if (detectedTax) {
+                html += `<span class="badge badge-tax"><i class="fa-solid fa-file-invoice-dollar"></i> ${detectedTax}</span> `;
+            }
+            if (finalAmount) {
+                if (isSuggested) {
+                    html += `<span class="badge badge-val" style="background:#854d0e; border:1px solid #ca8a04; color:white;"><i class="fa-solid fa-clock-rotate-left"></i> Sugerido: $${finalAmount.toLocaleString('es-AR')}</span> `;
+                } else {
+                    html += `<span class="badge badge-val"><i class="fa-solid fa-dollar-sign"></i> ${finalAmount.toLocaleString('es-AR')}</span> `;
+                }
+            }
+
+            if (!detectedMonth && !detectedTax && !finalAmount) {
+                html = '<span style="color:var(--text-secondary); font-size:0.8rem;"><i class="fa-solid fa-lightbulb"></i> Escribe ej: "edea roca 104800"</span>';
+            } else {
+                html += `<button type="button" class="btn-apply-smart" onclick="applySmartNLP('${detectedMonth || ''}', '${detectedTax || ''}', ${finalAmount || 'null'}, ${isSuggested})"><i class="fa-solid fa-bolt"></i> Auto-completado</button>`;
+            }
+            preview.innerHTML = html;
+        }
+
+        // Aplicar NLP al formulario
+        function applySmartNLP(month, tax, amount, isSuggested) {
+            if (month) document.getElementById('selectMonth').value = month;
+            if (tax) document.getElementById('selectTax').value = tax;
+            if (amount !== null && amount !== undefined) document.getElementById('inputAmount').value = amount;
+
+            if (isSuggested) {
+                showToast('Asistente Activo', 'Formulario completado con el último monto registrado.', 'success');
+            } else {
+                showToast('Asistente Activo', 'Formulario autocompletado con éxito.', 'success');
+            }
+            
+            // Foco
+            if (!amount || isSuggested) {
+                document.getElementById('inputAmount').focus();
+            } else {
+                document.getElementById('btnSubmit').focus();
+            }
+        }
+
+        // Helper: Toggle Procesando
+        function setProcessing(active) {
+            const overlay = document.getElementById('processingOverlay');
+            if (active) overlay.classList.add('active');
+            else overlay.classList.remove('active');
+        }
+
+        // Helper: Toast alerts
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            let icon = 'fa-circle-check';
+            if (type === 'error') icon = 'fa-circle-xmark';
+            
+            toast.innerHTML = `
+                <i class="fa-solid ${icon}" style="font-size: 1.2rem; color: ${type === 'success' ? 'var(--success)' : 'var(--danger)'}"></i>
+                <div>
+                    <div style="font-weight: 700; font-size: 0.85rem;">${title}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">${message}</div>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 50);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
