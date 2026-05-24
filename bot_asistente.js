@@ -3,7 +3,7 @@ const SmartNLPParser = {
         "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
     ],
-    
+
     // Extensible properties mapping
     PROPERTIES: [
         { key: "roca", label: "Roca" },
@@ -196,7 +196,7 @@ class BotAsistente {
         this.getRowValue = (row, colName) => {
             if (!row || !colName) return undefined;
             if (row[colName] !== undefined) return row[colName];
-            
+
             const norm = colName.trim().toLowerCase();
             for (const key of Object.keys(row)) {
                 const keyNorm = key.trim().toLowerCase();
@@ -418,19 +418,18 @@ class BotAsistente {
             /* ===== FILA del mensaje (alinear burbuja + cola juntas) ===== */
             .wa-msg-row {
                 display: flex;
-                align-items: flex-end;
+                align-items: flex-start;
                 max-width: 85%;
                 margin-bottom: 4px;
             }
             .wa-msg-row.row-bot  { align-self: flex-start; }
-            .wa-msg-row.row-user { align-self: flex-end;   flex-direction: row-reverse; }
+            .wa-msg-row.row-user { align-self: flex-end; }
 
             /* ===== COLA (tail) del mensaje ===== */
             .wa-tail {
                 width: 8px;
                 height: 13px;
                 flex-shrink: 0;
-                margin-bottom: 1px;
             }
             .wa-tail-bot {
                 margin-right: -1px;
@@ -605,7 +604,7 @@ class BotAsistente {
         // Crear la estructura HTML del widget
         const widget = document.createElement('div');
         widget.className = 'bot-widget';
-        
+
         // Detección estricta de dispositivo móvil
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
@@ -690,12 +689,12 @@ class BotAsistente {
 
     showTypingIndicator() {
         const msgs = document.getElementById('botMessages');
-        
+
         const row = document.createElement('div');
         row.className = `wa-msg-row row-bot wa-typing-row`;
 
-        const tailBotSVG = `<svg class="wa-tail wa-tail-bot" viewBox="0 0 8 13" xmlns="http://www.w3.org/2000/svg"><path d="M1 0 Q0 8 5 13 L8 13 L8 0 Z" fill="#ffffff"/></svg>`;
-        
+        const tailBotSVG = `<svg class="wa-tail wa-tail-bot" viewBox="0 0 8 13" xmlns="http://www.w3.org/2000/svg"><path d="M1.533 2.568L8 11.193V0H2.812C1.042 0 .474 1.156 1.533 2.568z" fill="#ffffff"/></svg>`;
+
         const makeTail = (svgStr) => {
             const tmp = document.createElement('div');
             tmp.innerHTML = svgStr;
@@ -709,7 +708,7 @@ class BotAsistente {
         row.appendChild(makeTail(tailBotSVG));
         row.appendChild(bubble);
         msgs.appendChild(row);
-        
+
         this.scrollToBottom();
     }
 
@@ -760,8 +759,8 @@ class BotAsistente {
             tmp.innerHTML = svgStr;
             return tmp.firstElementChild;
         };
-        const tailBotSVG = `<svg class="wa-tail wa-tail-bot" viewBox="0 0 8 13" xmlns="http://www.w3.org/2000/svg"><path d="M1 0 Q0 8 5 13 L8 13 L8 0 Z" fill="#ffffff"/></svg>`;
-        const tailUserSVG = `<svg class="wa-tail wa-tail-user" viewBox="0 0 8 13" xmlns="http://www.w3.org/2000/svg"><path d="M7 0 Q8 8 3 13 L0 13 L0 0 Z" fill="#DCF8C6"/></svg>`;
+        const tailBotSVG = `<svg class="wa-tail wa-tail-bot" viewBox="0 0 8 13" xmlns="http://www.w3.org/2000/svg"><path d="M1.533 2.568L8 11.193V0H2.812C1.042 0 .474 1.156 1.533 2.568z" fill="#ffffff"/></svg>`;
+        const tailUserSVG = `<svg class="wa-tail wa-tail-user" viewBox="0 0 8 13" xmlns="http://www.w3.org/2000/svg"><path d="M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z" fill="#DCF8C6"/></svg>`;
 
         const row = document.createElement('div');
         row.className = `wa-msg-row row-${sender}`;
@@ -789,13 +788,13 @@ class BotAsistente {
         // Normalizar texto (quitar acentos y puntuación para búsquedas robustas)
         const cleanText = (str) => {
             return str.normalize("NFD")
-                      .replace(/[\u0300-\u036f]/g, "")
-                      .toLowerCase()
-                      .replace(/[¿?¡!.,]/g, "")
-                      .trim();
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .replace(/[¿?¡!.,]/g, "")
+                .trim();
         };
         const q = cleanText(query);
-        
+
         // Obtener la base de datos real desde index.html
         const data = window.database || [];
         if (data.length === 0) {
@@ -810,10 +809,10 @@ class BotAsistente {
         if (greetings.some(g => q === g || q.startsWith(g + " "))) {
             const currentMonthName = this.getCurrentMonthName();
             return `¡Buenas! ¿Cómo andás? 😊 Acá estoy para darte una mano con el sistema de gastos.<br><br>` +
-                   `Contame, ¿qué querés chusmear hoy? Podés preguntarme cosas como:<br>` +
-                   `• <i>"¿Qué debo pagar en ${currentMonthName}?"</i><br>` +
-                   `• <i>"¿Cuánto gasté en Luz este año?"</i><br>` +
-                   `• <i>"¿Cuál es el mayor gasto?"</i>`;
+                `Contame, ¿qué querés chusmear hoy? Podés preguntarme cosas como:<br>` +
+                `• <i>"¿Qué debo pagar en ${currentMonthName}?"</i><br>` +
+                `• <i>"¿Cuánto gasté en Luz este año?"</i><br>` +
+                `• <i>"¿Cuál es el mayor gasto?"</i>`;
         }
 
         if (thanks.some(t => q === t || q.startsWith(t + " "))) {
@@ -871,6 +870,61 @@ class BotAsistente {
                     // Si no escribió afirmación ni negación pero introdujo otra orden, cancelamos contexto
                     this.context = null;
                 }
+            } else if (this.context.pendingAction === "reviewing_pending") {
+                // Flujo de revisión uno por uno de items pendientes del mes
+                const affirmativeR = ["si", "sii", "dale", "ok", "confirmar", "yes", "bueno", "claro", "obvio"];
+                const negativeR    = ["no", "saltar", "omitir", "skip", "paso"];
+                const confirmAllR  = ["todos", "todo", "confirmar todos", "todos si", "registrar todo"];
+
+                const { month: mR, pendingItems: pItems, currentIndex: cIdx } = this.context;
+
+                if (confirmAllR.some(w => q.includes(w))) {
+                    // Registrar todos los restantes de una
+                    const remaining = pItems.slice(cIdx);
+                    remaining.forEach(item => {
+                        if (window.updateTaxCell) window.updateTaxCell(mR, item.tax, item.amount);
+                    });
+                    this.context = null;
+                    const cnt = remaining.length;
+                    return `✅ ¡Joya! Registré los <strong>${cnt}</strong> pago${cnt !== 1 ? 's' : ''} pendiente${cnt !== 1 ? 's' : ''} de <strong>${mR}</strong> como pagos confirmados. Ya se actualizó el tablero. 🎉`;
+                }
+
+                if (affirmativeR.some(w => q.includes(w))) {
+                    const item = pItems[cIdx];
+                    if (window.updateTaxCell) window.updateTaxCell(mR, item.tax, item.amount);
+                    const nextIdx = cIdx + 1;
+                    if (nextIdx >= pItems.length) {
+                        this.context = null;
+                        return `✅ ¡Registrado! <strong>${item.tax}</strong> $${item.amount.toLocaleString('es-AR')} en ${mR}.<br><br>¡Revisaste todos los pendientes! No queda nada más. 🎉`;
+                    }
+                    this.context.currentIndex = nextIdx;
+                    const next = pItems[nextIdx];
+                    const remCnt = pItems.length - nextIdx;
+                    return `✅ ¡Registrado! <strong>${item.tax}</strong> $${item.amount.toLocaleString('es-AR')} confirmado.<br><br>` +
+                        `Quedan <strong>${remCnt}</strong> más. ¿Registrás este?<br>` +
+                        `• <strong>${next.tax}</strong>: $${next.amount.toLocaleString('es-AR')}<br><br>` +
+                        `Respondé <strong>si</strong>, <strong>no</strong> para saltarlo, o <strong>todos</strong> para confirmar el resto de una.`;
+                }
+
+                if (negativeR.some(w => q.includes(w))) {
+                    const item = pItems[cIdx];
+                    const nextIdx = cIdx + 1;
+                    if (nextIdx >= pItems.length) {
+                        this.context = null;
+                        return `Ok, salté <strong>${item.tax}</strong>. Ya revisaste todos los pendientes de <strong>${mR}</strong>. 👍`;
+                    }
+                    this.context.currentIndex = nextIdx;
+                    const next = pItems[nextIdx];
+                    const remCnt2 = pItems.length - nextIdx;
+                    return `Ok, salté <strong>${item.tax}</strong>.<br><br>` +
+                        `Quedan <strong>${remCnt2}</strong> más. ¿Registrás este?<br>` +
+                        `• <strong>${next.tax}</strong>: $${next.amount.toLocaleString('es-AR')}<br><br>` +
+                        `Respondé <strong>si</strong>, <strong>no</strong>, o <strong>todos</strong> para el resto.`;
+                }
+
+                // No reconoció la respuesta
+                const cur = pItems[cIdx];
+                return `No entendí. ¿Registrás <strong>${cur.tax}</strong> ($${cur.amount.toLocaleString('es-AR')}) de <strong>${mR}</strong> como pago? Respondé <strong>si</strong>, <strong>no</strong>, o <strong>todos</strong>.`;
             }
         }
 
@@ -904,10 +958,19 @@ class BotAsistente {
                 parsed.detectedMonth = matchedMonth;
             }
         }
-        
+
         // Guardar contexto para la próxima pregunta
         if (matchedTax) {
             this.lastTopic = { tax: matchedTax, month: matchedMonth };
+        }
+
+        // 1.5. Consulta de PENDIENTES AGENDADOS en un mes (ej: "tengo agendado en junio", "qué tengo pendiente en junio")
+        const hasPendingReviewKw = q.includes('agendado') || q.includes('agendados') ||
+            (q.includes('pendiente') && !parsed.detectedAmount && matchedMonth) ||
+            (q.includes('debo') && !parsed.detectedAmount && matchedMonth) ||
+            q.includes('que tengo en') || q.includes('que hay en');
+        if (hasPendingReviewKw && matchedMonth) {
+            return this.handlePendingReview(matchedMonth);
         }
 
         // 2. Comando Borrar / Eliminar
@@ -918,7 +981,7 @@ class BotAsistente {
         }
 
         // 3. Comando Cargar/Pagar directo
-        const hasDirectCommandKeyword = q.includes('cargar') || q.includes('pagar') || q.includes('registra') || q.includes('subir');
+        const hasDirectCommandKeyword = q.includes('cargar') || q.includes('pagar') || q.includes('registra') || q.includes('subir') || q.includes('anota') || q.includes('guarda') || q.includes('agrega') || q.includes('agenda') || (parsed.detectedAmount && (q.includes('pendiente') || q.includes('deuda') || q.includes('debo')));
         if (hasDirectCommandKeyword && hasDetectedTax) {
             return this.handleQuickLoadNLP(query); // Pasamos query original para no perder cifras decimales
         }
@@ -976,10 +1039,10 @@ class BotAsistente {
         // ====================================================
         // CATEGORÍA 2: PENDIENTES / DEBO
         // ====================================================
-        if (q.includes('pendiente') || q.includes('debo') || q.includes('falta') || q.includes('deber') || q.includes('sin pagar') || q.includes('deuda') || (q.includes('pagar') && !matchedTax) || (q.includes('pago') && !matchedTax)) {
+        if (!matchedTax && (q.includes('pendiente') || q.includes('debo') || q.includes('falta') || q.includes('deber') || q.includes('sin pagar') || q.includes('deuda') || q.includes('pagar') || q.includes('pago'))) {
             const targetMonth = matchedMonth || this.getCurrentMonthName();
             const row = data.find(r => r.Mes.trim().toLowerCase() === targetMonth.trim().toLowerCase());
-            
+
             if (!row) {
                 return `Uf, no tengo cargados los datos para el mes de **${targetMonth}** en mi base.`;
             }
@@ -998,8 +1061,16 @@ class BotAsistente {
                 if (val === undefined || val === null || val === "" || val === "-") {
                     pendingList.push(col);
                 } else {
+                    const strVal = String(val).trim().toLowerCase();
                     const numericVal = parseFloat(val);
-                    if (isNaN(numericVal) || numericVal === 0) {
+                    if (strVal.startsWith('p ')) {
+                        const pAmount = parseFloat(strVal.replace('p ', '').trim());
+                        if (!isNaN(pAmount)) {
+                            pendingList.push(`${col} (Pendiente: $${pAmount.toLocaleString('es-AR')})`);
+                        } else {
+                            pendingList.push(col);
+                        }
+                    } else if (isNaN(numericVal) || numericVal === 0) {
                         pendingList.push(col);
                     }
                 }
@@ -1009,7 +1080,7 @@ class BotAsistente {
                 return `🎉 ¡Qué golazo! Tenés todos los impuestos de **${targetMonth}** pagados para **${activeTab.toUpperCase()}**. ¡Todo al día!`;
             }
 
-            return `📋 **Acá tenés lo pendiente de ${targetMonth} en ${activeTab.toUpperCase()} (${pendingList.length} en total):**<br><ul style="padding-left: 20px; margin-top: 6px;">` + 
+            return `📋 **Acá tenés lo pendiente de ${targetMonth} en ${activeTab.toUpperCase()} (${pendingList.length} en total):**<br><ul style="padding-left: 20px; margin-top: 6px;">` +
                 pendingList.map(item => `<li style="margin-bottom:4px;">${item}</li>`).join('') + `</ul>`;
         }
 
@@ -1168,7 +1239,7 @@ class BotAsistente {
                     return `No registré ningún pago para **${matchedTax}** en todo el año.`;
                 }
 
-                return `💰 De **${matchedTax}** llevás pagado un total de **$${sum.toLocaleString('es-AR', { maximumFractionDigits: 0 })}** en el año.<br><br>Detalle de meses:<br>` + 
+                return `💰 De **${matchedTax}** llevás pagado un total de **$${sum.toLocaleString('es-AR', { maximumFractionDigits: 0 })}** en el año.<br><br>Detalle de meses:<br>` +
                     monthsPaid.map(m => `• ${m}`).join('<br>');
             }
 
@@ -1223,11 +1294,19 @@ class BotAsistente {
             // Escribieron el nombre de un impuesto o preguntaron por él (ej. "luz", "edea", "info edea")
             const currentMonthName = this.getCurrentMonthName();
             const currentMonthRow = data.find(r => r.Mes.trim().toLowerCase() === currentMonthName.toLowerCase());
-            
+
             let statusCurrent = "🔴 PENDIENTE (Todavía no figura pago)";
             if (currentMonthRow) {
-                const val = parseFloat(this.getRowValue(currentMonthRow, matchedTax));
-                if (!isNaN(val) && val > 0) {
+                const rawVal = this.getRowValue(currentMonthRow, matchedTax);
+                const strVal = String(rawVal || "").trim().toLowerCase();
+                const val = parseFloat(rawVal);
+
+                if (strVal.startsWith('p ')) {
+                    const pAmount = parseFloat(strVal.replace('p ', '').trim());
+                    if (!isNaN(pAmount)) {
+                        statusCurrent = `🔴 PENDIENTE (Monto asignado a pagar: $${pAmount.toLocaleString('es-AR')})`;
+                    }
+                } else if (!isNaN(val) && val > 0) {
                     statusCurrent = `🟢 PAGADO (se pagaron **$${val.toLocaleString('es-AR', { minimumFractionDigits: 0 })}**)`;
                 }
             }
@@ -1250,14 +1329,14 @@ class BotAsistente {
 
             let responseText = `ℹ️ **Estado de: ${matchedTax}**${matchedProperty ? ` (en ${matchedProperty})` : ''}<br><br>`;
             responseText += `• 📅 **Mes actual (${currentMonthName}):** ${statusCurrent}<br>`;
-            
+
             if (paymentsCount > 0) {
                 responseText += `• 🕒 **Último pago:** $${lastAmount.toLocaleString('es-AR', { minimumFractionDigits: 0 })} en **${lastMonth}**<br>`;
                 responseText += `• 📈 **Total anual pagado:** **$${annualTotal.toLocaleString('es-AR', { minimumFractionDigits: 0 })}** (${paymentsCount} meses pagados)<br>`;
             } else {
                 responseText += `• 🕒 **Historial:** No registré ningún pago para este servicio en lo que va del año.<br>`;
             }
-            
+
             return responseText;
         }
 
@@ -1288,7 +1367,7 @@ class BotAsistente {
         // Si pide borrar "el último", ignoramos el mes detectado por defecto y buscamos cuál fue
         const textLower = (q || "").toLowerCase();
         const isUltimo = textLower.includes('ultimo') || textLower.includes('último') || textLower.includes('ese');
-        
+
         if (isUltimo) {
             const data = window.database || [];
             let lastPaidMonth = "";
@@ -1308,7 +1387,7 @@ class BotAsistente {
         if (!finalMonth) {
             finalMonth = this.getCurrentMonthName();
         }
-        
+
         if (window.updateTaxCell) {
             window.updateTaxCell(finalMonth, detectedTax, 0);
             return `🗑️ ¡Listo! He borrado el pago de **${detectedTax}** del mes de **${finalMonth}**.<br><br>Ya se actualizó en el sistema.`;
@@ -1326,23 +1405,40 @@ class BotAsistente {
         // 1. Si hay múltiples coincidencias (ej. "peugeot" sin especificar seguro o patente)
         if (detectedTaxes && detectedTaxes.length > 1) {
             let reply = `📋 **Mapeando sistema...** Detecté que quieres registrar un pago en **${finalMonth}** pero coincide con más de un servicio en tu sistema. ¿Cuál de ellos deseas registrar?<br><br>`;
-            
+
             detectedTaxes.forEach(tax => {
                 let currentValue = null;
+                let pendingValue = null;
                 const targetRow = data.find(r => r.Mes && r.Mes.trim().toLowerCase() === finalMonth.toLowerCase());
                 const val = this.getRowValue(targetRow, tax);
                 if (targetRow && val !== undefined && val !== null && val !== "" && val !== "-") {
+                    const strVal = String(val).trim().toLowerCase();
                     const parsedVal = parseFloat(val);
-                    if (!isNaN(parsedVal) && parsedVal > 0) {
+                    if (strVal.startsWith('p ')) {
+                        const pAmount = parseFloat(strVal.replace('p ', '').trim());
+                        if (!isNaN(pAmount)) pendingValue = pAmount;
+                    } else if (!isNaN(parsedVal) && parsedVal > 0) {
                         currentValue = parsedVal;
                     }
                 }
-                
+
                 const lastPaid = this.getLastPaidAmount(tax);
-                
+
                 reply += `<strong>• ${tax}:</strong> `;
                 if (currentValue !== null) {
                     reply += `🟢 Ya está PAGADO ($${currentValue.toLocaleString('es-AR')})<br><br>`;
+                } else if (detectedAmount) {
+                    const isPending = q.toLowerCase().includes('pendiente') || q.toLowerCase().includes('deuda') || q.toLowerCase().includes('debo');
+                    const finalAmountToSave = isPending ? `p ${detectedAmount}` : detectedAmount;
+                    const labelBtn = isPending ? `Asignar PENDIENTE $${detectedAmount.toLocaleString('es-AR')}` : `Pagar $${detectedAmount.toLocaleString('es-AR')}`;
+                    
+                    reply += `🔴 Detectado en tu mensaje<br>` +
+                        `<button class="btn-chat-action" onclick="window.botInstance.confirmPayment('${finalMonth}', '${tax}', '${finalAmountToSave}', this)">` +
+                        `<i class="fa-solid fa-floppy-disk"></i> ${labelBtn}</button><br><br>`;
+                } else if (pendingValue !== null) {
+                    reply += `🔴 PENDIENTE (Monto asignado: $${pendingValue.toLocaleString('es-AR')})<br>` +
+                        `<button class="btn-chat-action" onclick="window.botInstance.confirmPayment('${finalMonth}', '${tax}', ${pendingValue}, this)">` +
+                        `<i class="fa-solid fa-floppy-disk"></i> Pagar $${pendingValue.toLocaleString('es-AR')}</button><br><br>`;
                 } else if (lastPaid !== null) {
                     reply += `🔴 PENDIENTE<br>` +
                         `<button class="btn-chat-action" onclick="window.botInstance.confirmPayment('${finalMonth}', '${tax}', ${lastPaid}, this)">` +
@@ -1359,33 +1455,48 @@ class BotAsistente {
         if (detectedTax && detectedAmount) {
             // Enviar petición de guardado DIRECTAMENTE (sin tocar el DOM de la página principal)
             if (window.updateTaxCell) {
-                window.updateTaxCell(finalMonth, detectedTax, detectedAmount);
-                let reply = `⚡ ¡Excelente! He detectado y enviado el registro:<br><br>` + 
-                    `• Servicio: <strong>${detectedTax}</strong><br>`;
-                if (detectedProperty) {
-                    reply += `• Propiedad: <strong>${detectedProperty}</strong><br>`;
+                const isPending = q.toLowerCase().includes('pendiente') || q.toLowerCase().includes('deuda') || q.toLowerCase().includes('debo');
+                const finalAmountToSave = isPending ? `p ${detectedAmount}` : detectedAmount;
+
+                window.updateTaxCell(finalMonth, detectedTax, finalAmountToSave);
+
+                let reply;
+                if (isPending) {
+                    reply = `🕐 ¡Listo! Agendé el pago como <strong>PENDIENTE</strong>:<br><br>` +
+                        `• Servicio: <strong>${detectedTax}</strong><br>`;
+                    if (detectedProperty) reply += `• Propiedad: <strong>${detectedProperty}</strong><br>`;
+                    reply += `• Mes: <strong>${finalMonth}</strong><br>` +
+                        `• Monto pendiente: <strong>$${detectedAmount.toLocaleString('es-AR')}</strong><br><br>` +
+                        `📌 Quedó registrado como deuda/pendiente en el tablero. Cuando lo pagues, decime <em>"registrar ${detectedTax} ${finalMonth}"</em> y lo confirmo. 👍`;
+                } else {
+                    reply = `⚡ ¡Excelente! Registré el pago:<br><br>` +
+                        `• Servicio: <strong>${detectedTax}</strong><br>`;
+                    if (detectedProperty) reply += `• Propiedad: <strong>${detectedProperty}</strong><br>`;
+                    reply += `• Mes: <strong>${finalMonth}</strong><br>` +
+                        `• Monto pagado: <strong>$${detectedAmount.toLocaleString('es-AR')}</strong><br><br>` +
+                        `Guardado en Google Sheets y actualizado en el tablero. ✅`;
                 }
-                reply += `• Mes: <strong>${finalMonth}</strong><br>` + 
-                    `• Monto: <strong>$${detectedAmount.toLocaleString('es-AR')}</strong><br><br>` + 
-                    `Guardado en Google Sheets y actualizado en el tablero.`;
                 return reply;
             }
         } else if (detectedTax) {
+
             // 3. Coincidencia única sin monto especificado (Proactivo)
-            
+
             // Verificar si ya está pagado en este mes
             let currentValue = null;
+            let pendingValue = null;
             const targetRow = data.find(r => r.Mes && r.Mes.trim().toLowerCase() === finalMonth.toLowerCase());
             const val = this.getRowValue(targetRow, detectedTax);
             if (targetRow && val !== undefined && val !== null && val !== "" && val !== "-") {
+                const strVal = String(val).trim().toLowerCase();
                 const parsedVal = parseFloat(val);
-                if (!isNaN(parsedVal) && parsedVal > 0) {
+                if (strVal.startsWith('p ')) {
+                    const pAmount = parseFloat(strVal.replace('p ', '').trim());
+                    if (!isNaN(pAmount)) pendingValue = pAmount;
+                } else if (!isNaN(parsedVal) && parsedVal > 0) {
                     currentValue = parsedVal;
                 }
             }
-
-            // Buscar último monto pagado en el historial de todo el año
-            const lastPaid = this.getLastPaidAmount(detectedTax);
 
             if (currentValue !== null) {
                 // Ya pagado en este mes
@@ -1394,6 +1505,28 @@ class BotAsistente {
                     `¿Deseas sobreescribir este pago con otro monto? Solo escríbelo en el chat, por ejemplo: <i>"cargar ${detectedTax} 95000"</i>.`;
                 return reply;
             }
+
+            if (pendingValue !== null) {
+                // Hay un valor pendiente explícito
+                this.context = {
+                    pendingAction: "awaiting_confirmation",
+                    taxName: detectedTax,
+                    month: finalMonth,
+                    property: detectedProperty,
+                    amount: pendingValue
+                };
+
+                let reply = `📋 **Mapeando sistema...** Detecté que **${detectedTax}** ${detectedProperty ? `(en ${detectedProperty})` : ''} está **PENDIENTE** en **${finalMonth}**.<br><br>` +
+                    `• Monto pendiente asignado: <strong>$${pendingValue.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong>.<br><br>` +
+                    `¿Quieres registrar este valor como pagado en la celda de **${finalMonth}**?<br><br>` +
+                    `<button class="btn-chat-action" onclick="window.botInstance.confirmPayment('${finalMonth}', '${detectedTax}', ${pendingValue}, this)">` +
+                    `<i class="fa-solid fa-floppy-disk"></i> Sí, pagar $${pendingValue.toLocaleString('es-AR')}</button><br><br>` +
+                    `*Si prefieres registrar otro monto, escríbelo aquí (ej. "pagar ${detectedTax} 75000").*`;
+                return reply;
+            }
+
+            // Buscar último monto pagado en el historial de todo el año
+            const lastPaid = this.getLastPaidAmount(detectedTax);
 
             if (lastPaid !== null) {
                 // Pendiente, pero tenemos historial (Guardar contexto de confirmación)
@@ -1437,21 +1570,71 @@ class BotAsistente {
             btnElement.disabled = true;
             btnElement.innerHTML = `<i class="fa-solid fa-circle-check"></i> ¡Registrado!`;
         }
-        
+
         if (window.updateTaxCell) {
             window.updateTaxCell(mes, columna, monto);
         }
     }
 
+    // ====================================================
+    // HANDLER: Revisar pendientes agendados en un mes
+    // ====================================================
+    handlePendingReview(month) {
+        const data = window.database || [];
+        const row = data.find(r => r.Mes && r.Mes.trim().toLowerCase() === month.trim().toLowerCase());
+
+        if (!row) {
+            return `No encontré datos para el mes de <strong>${month}</strong>. ¿Cargaste algo en ese mes? 🤔`;
+        }
+
+        // Buscar todas las celdas con valor que empieza con "p " (pendiente agendado)
+        const pendingItems = [];
+        const taxes = window.TAX_COLUMNS || [];
+        taxes.forEach(tax => {
+            const val = row[tax];
+            if (val && typeof val === 'string' && val.trim().toLowerCase().startsWith('p ')) {
+                const amount = parseFloat(val.trim().substring(2).replace(',', '.'));
+                if (!isNaN(amount) && amount > 0) {
+                    pendingItems.push({ tax, amount });
+                }
+            }
+        });
+
+        if (pendingItems.length === 0) {
+            return `✅ No tenés nada pendiente en <strong>${month}</strong>. ¡Todo al día! 💪`;
+        }
+
+        // Armar resumen de todos los pendientes
+        const totalPending = pendingItems.reduce((sum, i) => sum + i.amount, 0);
+        let listHtml = `📋 Encontré <strong>${pendingItems.length}</strong> pago${pendingItems.length !== 1 ? 's' : ''} pendiente${pendingItems.length !== 1 ? 's' : ''} agendado${pendingItems.length !== 1 ? 's' : ''} en <strong>${month}</strong>:<br><br>`;
+        pendingItems.forEach((item, i) => {
+            listHtml += `${i + 1}. 🕐 <strong>${item.tax}</strong>: $${item.amount.toLocaleString('es-AR')}<br>`;
+        });
+        listHtml += `<br>💰 Total pendiente: <strong>$${totalPending.toLocaleString('es-AR')}</strong><br><br>`;
+        listHtml += `¿Querés registrar alguno como pago real? Empezamos con el primero:<br>`;
+        listHtml += `• <strong>${pendingItems[0].tax}</strong>: $${pendingItems[0].amount.toLocaleString('es-AR')}<br><br>`;
+        listHtml += `Respondé <strong>si</strong> para confirmarlo, <strong>no</strong> para saltarlo, o <strong>todos</strong> para confirmar todos de una. 👇`;
+
+        // Guardar contexto para el flujo conversacional uno por uno
+        this.context = {
+            pendingAction: "reviewing_pending",
+            month,
+            pendingItems,
+            currentIndex: 0
+        };
+
+        return listHtml;
+    }
+
     getLastPaidAmount(taxName) {
         const data = window.database || [];
         if (data.length === 0) return null;
-        
+
         const monthOrder = [
             "Diciembre", "Noviembre", "Octubre", "Septiembre", "Agosto", "Julio",
             "Junio", "Mayo", "Abril", "Marzo", "Febrero", "Enero"
         ];
-        
+
         for (const m of monthOrder) {
             const row = data.find(r => r.Mes && r.Mes.trim().toLowerCase() === m.toLowerCase());
             const valStr = this.getRowValue(row, taxName);
