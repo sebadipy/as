@@ -451,8 +451,10 @@ class BotAsistente {
             }
 
             /* Ensure header actions are visible when chat is opened on any small screen */
-            .bot-window.show .mobile-header-actions {
-                display: flex !important;
+            @media (max-width: 768px) {
+                .bot-window.show .mobile-header-actions {
+                    display: flex !important;
+                }
             }
 
             /* ===== ÁREA DE MENSAJES (wallpaper) ===== */
