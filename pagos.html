@@ -995,6 +995,16 @@
             50% { box-shadow: 0 0 10px 3px rgba(245,158,11,0.25);
                 border-color: rgba(245,158,11,0.8); }
         }
+
+            /* Mobile simplified view */
+            .mobile-summary { display: none; }
+            @media (max-width: 600px) {
+                header { padding: 12px 4%; }
+                .kpi-row, .assistant-panel, .matrix-panel, .filters-row, .table-panel { display: none !important; }
+                .mobile-summary { display: block; background: var(--surface); border-radius:12px; padding:12px; box-shadow:var(--shadow); margin-bottom:12px; }
+                .btn-mobile-open { display:block; width:100%; padding:12px; border-radius:10px; background:var(--primary); color:white; text-align:center; text-decoration:none; font-weight:700; }
+                .desktop-only { display:none !important; }
+            }
     </style>
 </head>
 <body>
@@ -1030,6 +1040,22 @@
     </header>
 
     <div class="container">
+        <!-- Mobile summary (visible only on small screens) -->
+        <div class="mobile-summary">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-secondary)">Resumen</div>
+                    <div style="font-weight:700;font-size:1.1rem">Pagos pendientes</div>
+                </div>
+                <div style="text-align:right">
+                    <div style="color:var(--primary);font-weight:700" id="mobileTotalPending">-</div>
+                    <div style="font-size:0.75rem;color:var(--text-secondary)">Total estimado</div>
+                </div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px;">
+                <a class="btn-mobile-open" href="pagos.html#full">Abrir versión completa</a>
+            </div>
+        </div>
         <!-- Aviso de Modo Demo -->
         <div id="demoAlert" class="demo-badge" style="display: none;">
             <i class="fa-solid fa-triangle-exclamation"></i>
