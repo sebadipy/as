@@ -279,6 +279,34 @@ class BotAsistente {
                 box-shadow: 0 10px 28px rgba(37, 211, 102, 0.55);
             }
 
+            /* Quick action buttons near the bubble (mobile) */
+            .bot-quick-actions {
+                display: none;
+                position: fixed;
+                right: 25px;
+                bottom: 95px;
+                z-index: 9999;
+                flex-direction: column;
+                gap: 8px;
+                align-items: center;
+            }
+            .bot-quick-actions button {
+                width: 44px;
+                height: 44px;
+                border-radius: 10px;
+                border: none;
+                background: #075E54;
+                color: white;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+                cursor: pointer;
+            }
+            @media (max-width: 768px) {
+                .bot-quick-actions { display: flex; }
+            }
+
             /* ===== VENTANA DEL CHAT ===== */
             .bot-window {
                 position: absolute;
@@ -634,8 +662,13 @@ class BotAsistente {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
         widget.innerHTML = `
-            <div class="bot-bubble-trigger" id="botTrigger" onclick="window.botInstance.toggleWindow()">
-                <i class="fa-brands fa-whatsapp"></i>
+            <div class="bot-bubble-group">
+                <div class="bot-bubble-trigger" id="botTrigger" onclick="window.botInstance.toggleWindow()">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </div>
+                <div class="bot-quick-actions" id="botQuickActions">
+                    <button type="button" title="Pagos" onclick="window.location.href='pagos.html'"><i class="fa-solid fa-file-invoice-dollar"></i></button>
+                </div>
             </div>
             <div class="bot-window" id="botWindow">
                 <div class="bot-header">
