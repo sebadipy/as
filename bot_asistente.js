@@ -683,7 +683,7 @@ class BotAsistente {
                     </div>
                     <div class="mobile-header-actions">
                         <button disabled title="Alquileres (Próximamente)"><i class="fa-solid fa-house-user"></i></button>
-                        <button type="button" title="Abrir Pagos" onclick="window.location.href='pagos.html'"><i class="fa-solid fa-file-invoice-dollar"></i></button>
+                        <button type="button" title="Abrir Pagos" onclick="event.stopPropagation(); window.location.href='pagos.html'"><i class="fa-solid fa-file-invoice-dollar"></i></button>
                         <button type="button" title="Abrir Limpieza" onclick="window.location.href='limpieza.html'"><i class="fa-solid fa-broom"></i></button>
                     </div>
                     <button class="bot-close" onclick="window.botInstance.closeAndClearChat()"><i class="fa-solid fa-xmark"></i></button>
