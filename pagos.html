@@ -746,6 +746,255 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
             border: 1px solid rgba(0, 0, 0, 0.04);
         }
+
+        /* ============================================
+           MODAL VENCIMIENTOS DEL PRÓXIMO MES
+        ============================================ */
+        #vencimientosModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(6px);
+            z-index: 9998;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: fadeIn 0.25s ease;
+        }
+        #vencimientosModal.show { display: flex; }
+
+        .venc-modal-box {
+            background: var(--surface);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 680px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            border: 1px solid var(--border);
+            animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        .venc-modal-header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .venc-modal-header-left { display: flex; align-items: center; gap: 12px; }
+
+        .venc-modal-icon {
+            background: rgba(255,255,255,0.2);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .venc-modal-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .venc-modal-subtitle {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            margin-top: 2px;
+        }
+
+        .venc-modal-close {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .venc-modal-close:hover { background: rgba(255,255,255,0.3); }
+
+        .venc-modal-summary {
+            padding: 1rem 1.5rem;
+            background: #fffbeb;
+            border-bottom: 1px solid #fde68a;
+            display: flex;
+            gap: 1.5rem;
+            flex-shrink: 0;
+        }
+        .venc-summary-item { display: flex; flex-direction: column; gap: 2px; }
+        .venc-summary-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #92400e; letter-spacing: 0.5px; }
+        .venc-summary-val { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 700; color: #d97706; }
+        .venc-summary-val.green { color: #059669; }
+
+        .venc-modal-body {
+            overflow-y: auto;
+            flex: 1;
+            padding: 1rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .venc-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fafafa;
+            transition: all 0.2s;
+        }
+        .venc-item:hover { background: #f1f5f9; border-color: #94a3b8; }
+        .venc-item.paid-item { background: #f0fdf4; border-color: #86efac; opacity: 0.6; }
+        .venc-item.pending-item { border-color: #fcd34d; background: #fffbeb; }
+
+        .venc-item-info { display: flex; flex-direction: column; gap: 2px; }
+        .venc-item-name { font-weight: 700; font-size: 0.9rem; color: var(--text-primary); }
+        .venc-item-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+            width: fit-content;
+        }
+        .badge-unpaid { background: #fee2e2; color: #b91c1c; }
+        .badge-scheduled { background: #fef3c7; color: #92400e; }
+        .badge-done { background: #d1fae5; color: #065f46; }
+
+        .venc-item-input {
+            width: 130px;
+            padding: 7px 10px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: right;
+            transition: all 0.2s;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+        }
+        .venc-item-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+        }
+        .venc-item-input:disabled { background: #f1f5f9; color: #94a3b8; }
+
+        .btn-venc-item-pay {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+            height: 36px;
+            min-width: 85px;
+        }
+        .btn-venc-item-pay:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+        .btn-venc-item-pay:disabled {
+            background: #d1fae5;
+            color: #065f46;
+            cursor: default;
+            transform: none;
+        }
+
+        .venc-modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            flex-shrink: 0;
+            background: #f8fafc;
+        }
+
+        .btn-venc-pay-all {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(245,158,11,0.35);
+        }
+        .btn-venc-pay-all:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(245,158,11,0.45); }
+
+        .btn-venc-cancel {
+            background: var(--surface);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-venc-cancel:hover { background: #f1f5f9; }
+
+        /* Botón header vencimientos */
+        .btn-vencimientos {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fef3c7;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            animation: pulse-orange 2.5s infinite ease-in-out;
+        }
+        .btn-vencimientos:hover {
+            background: rgba(245, 158, 11, 0.35);
+            transform: translateY(-2px);
+        }
+        @keyframes pulse-orange {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0);
+                border-color: rgba(245,158,11,0.4); }
+            50% { box-shadow: 0 0 10px 3px rgba(245,158,11,0.25);
+                border-color: rgba(245,158,11,0.8); }
+        }
     </style>
 </head>
 <body>
@@ -774,6 +1023,10 @@
         <a href="index.html" class="btn-back-home">
             <i class="fa-solid fa-arrow-left"></i> Volver al Inicio
         </a>
+        <button class="btn-vencimientos" onclick="openVencimientosModal()" title="Ver qué falta pagar el próximo mes">
+            <i class="fa-solid fa-calendar-exclamation"></i>
+            <span id="vencBtnLabel">Próximos Vencimientos</span>
+        </button>
     </header>
 
     <div class="container">
@@ -798,6 +1051,17 @@
                     <div class="kpi-value" id="kpiHighestService">-</div>
                 </div>
                 <div class="kpi-icon"><i class="fa-solid fa-fire-flame-curved"></i></div>
+            </div>
+            <!-- KPI Vencimientos Próximo Mes -->
+            <div class="kpi-card" style="border-color: rgba(245,158,11,0.4); cursor:pointer;" onclick="openVencimientosModal()" title="Ver vencimientos">
+                <div class="kpi-info">
+                    <h3 style="color:#92400e;">Sin Pagar (Próx. Mes)</h3>
+                    <div class="kpi-value" id="kpiNextMonthUnpaid" style="color:#d97706;">-</div>
+                    <div style="font-size:0.75rem;color:#b45309;margin-top:2px;" id="kpiNextMonthName"></div>
+                </div>
+                <div class="kpi-icon" style="background:rgba(245,158,11,0.1);color:#d97706;">
+                    <i class="fa-solid fa-calendar-exclamation"></i>
+                </div>
             </div>
         </div>
 
@@ -896,6 +1160,81 @@
         </div>
     </div>
 
+    <!-- =====================================================
+         MODAL: VENCIMIENTOS DEL PRÓXIMO MES
+    ===================================================== -->
+    <div id="vencimientosModal">
+        <div class="venc-modal-box">
+            <!-- Header -->
+            <div class="venc-modal-header">
+                <div class="venc-modal-header-left">
+                    <div class="venc-modal-icon"><i class="fa-solid fa-calendar-exclamation"></i></div>
+                    <div>
+                        <div class="venc-modal-title">Vencimientos del Próximo Mes</div>
+                        <div class="venc-modal-subtitle" id="vencModalSubtitle">Servicios pendientes de pago</div>
+                    </div>
+                </div>
+                <button class="venc-modal-close" onclick="closeVencimientosModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Filtros interactivos internos -->
+            <div style="padding: 12px 20px; display: flex; gap: 12px; align-items: center; background: #f8fafc; border-bottom: 1px solid var(--border);">
+                <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+                    <label style="font-size: 0.72rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px;"><i class="fa-solid fa-house"></i> Propiedad</label>
+                    <select id="vencSelectProperty" onchange="changeVencProperty(this.value)" style="padding: 7px 10px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 0.85rem; font-weight: 600; outline: none; background: white; cursor: pointer; color: var(--text-primary);">
+                        <option value="roca">Roca</option>
+                        <option value="moreno">Moreno</option>
+                        <option value="colon">Colón</option>
+                        <option value="gascon">Gascón</option>
+                        <option value="cochera26">Cochera 26</option>
+                        <option value="cochera2">Cochera 2</option>
+                    </select>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
+                    <label style="font-size: 0.72rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px;"><i class="fa-solid fa-calendar"></i> Mes a Consultar</label>
+                    <select id="vencSelectMonth" onchange="changeVencMonth(this.value)" style="padding: 7px 10px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 0.85rem; font-weight: 600; outline: none; background: white; cursor: pointer; color: var(--text-primary);">
+                        <!-- Cargados dinámicamente -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Resumen -->
+            <div class="venc-modal-summary">
+                <div class="venc-summary-item">
+                    <span class="venc-summary-label">Sin pagar</span>
+                    <span class="venc-summary-val" id="vencSumUnpaid">-</span>
+                </div>
+                <div class="venc-summary-item">
+                    <span class="venc-summary-label">Agendados</span>
+                    <span class="venc-summary-val" id="vencSumScheduled">-</span>
+                </div>
+                <div class="venc-summary-item">
+                    <span class="venc-summary-label">Total estimado</span>
+                    <span class="venc-summary-val" id="vencSumTotal">$0</span>
+                </div>
+                <div class="venc-summary-item">
+                    <span class="venc-summary-label">Ya pagados</span>
+                    <span class="venc-summary-val green" id="vencSumPaid">-</span>
+                </div>
+            </div>
+            <!-- Lista de items -->
+            <div class="venc-modal-body" id="vencModalBody">
+                <!-- Llenado dinámicamente por JS -->
+            </div>
+            <!-- Footer -->
+            <div class="venc-modal-footer">
+                <button class="btn-venc-cancel" onclick="closeVencimientosModal()">
+                    <i class="fa-solid fa-xmark"></i> Cerrar
+                </button>
+                <button class="btn-venc-pay-all" onclick="payAllVencimientos()">
+                    <i class="fa-solid fa-bolt"></i> Registrar todos con sugerido
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Edición de Celda -->
     <div class="cell-modal-backdrop" id="cellModal">
         <div class="cell-modal-content">
@@ -916,8 +1255,11 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap;">
                 <button class="btn-modal-cancel" onclick="closeCellModal()">Cancelar</button>
+                <button class="btn-modal-delete" id="btnDeleteCell" onclick="deleteCellAmount()" style="display: none;">
+                    <i class="fa-solid fa-trash"></i> Borrar Pago
+                </button>
                 <button class="btn-submit" id="btnSaveModal" onclick="submitModalAmount()">
                     <i class="fa-solid fa-floppy-disk"></i> Guardar
                 </button>
@@ -1283,6 +1625,13 @@
             const modal = document.getElementById('cellModal');
             document.getElementById('modalTitle').textContent = `${columna} (${mes})`;
             document.getElementById('modalAmount').value = valorActual > 0 ? valorActual : '';
+            
+            // Mostrar botón de borrado si hay un pago actual (mayor a 0)
+            const deleteBtn = document.getElementById('btnDeleteCell');
+            if (deleteBtn) {
+                deleteBtn.style.display = valorActual > 0 ? 'inline-flex' : 'none';
+            }
+
             modal.classList.add('show');
             document.getElementById('modalAmount').focus();
         }
@@ -1324,11 +1673,15 @@
             selectedRowMonth = null;
         }
 
-        function confirmDeleteRow(mes = null) {
+        async function confirmDeleteRow(mes = null) {
             const monthToDelete = mes || selectedRowMonth;
             if (!monthToDelete) return;
 
-            const confirmed = window.confirm(`¿Deseas eliminar todos los valores de la fila de ${monthToDelete}?`);
+            const confirmed = await showCustomConfirm(
+                'Eliminar fila completa',
+                `¿Estás seguro de que deseas eliminar todos los valores de la fila de ${monthToDelete}? Esta acción no se puede deshacer.`,
+                true
+            );
             if (!confirmed) return;
 
             const rowData = database.find(r => r.Mes.trim().toLowerCase() === monthToDelete.trim().toLowerCase());
@@ -1387,7 +1740,25 @@
             closeCellModal();
         }
 
-        // Actualizar celda en Google Sheets o localmente
+        // Eliminar pago de una celda seleccionada
+        async function deleteCellAmount() {
+            if (!selectedCellData) return;
+            const confirmed = await showCustomConfirm(
+                'Borrar Pago',
+                `¿Estás seguro de que deseas borrar el pago de "${selectedCellData.columna}" para ${selectedCellData.mes}?`,
+                true
+            );
+            if (!confirmed) return;
+
+            await updateTaxCell(selectedCellData.mes, selectedCellData.columna, 0);
+            
+            const checkPend = document.getElementById('modalCheckPending');
+            if (checkPend) checkPend.checked = false;
+            
+            closeCellModal();
+        }
+
+        // Actualizar celda en el sistema o localmente
         async function updateTaxCell(mes, columna, monto) {
             setProcessing(true);
 
@@ -1422,17 +1793,17 @@
                 const result = await response.json();
                 
                 if (result && result.status === 'success') {
-                    showToast('¡Guardado!', `Se actualizó ${columna} (${mes}) en Google Sheets con éxito.`, 'success');
+                    showToast('¡Guardado!', `Se actualizó ${columna} (${mes}) en el sistema con éxito.`, 'success');
                 } else {
                     console.error('Error del backend:', result ? result.message : 'Respuesta vacía');
-                    showToast('Error', result ? result.message : 'Error al guardar en Google Sheets.', 'error');
+                    showToast('Error', result ? result.message : 'Error al guardar en el sistema.', 'error');
                 }
                 
                 // Forzar sincronización limpia en segundo plano para validar
                 setTimeout(() => loadAndRenderMatrix(true), 1500);
             } catch(e) {
-                console.error('Sincronizando con Sheets:', e);
-                showToast('¡Guardado!', `Se envió la actualización de ${columna} (${mes}) a Google Sheets.`, 'success');
+                console.error('Sincronizando con backend:', e);
+                showToast('¡Guardado!', `Se envió la actualización de ${columna} (${mes}) al sistema.`, 'success');
                 // Forzar recarga en segundo plano
                 setTimeout(() => loadAndRenderMatrix(true), 2000);
             }
@@ -1613,6 +1984,338 @@
                 setTimeout(() => toast.remove(), 300);
             }, 4000);
         }
+
+        // ====================================================
+        // LÓGICA DEL MODAL DE VENCIMIENTOS INTERACTIVO
+        // ====================================================
+        let vencimientosActiveMonth = null;
+        let vencimientosActiveProperty = null;
+
+        function openVencimientosModal(targetMonth = null) {
+            // 1. Determinar propiedad por defecto (la seleccionada en la pantalla principal)
+            vencimientosActiveProperty = activePropertyTab || 'roca';
+            
+            // 2. Determinar mes por defecto (el próximo mes respecto al mes actual del sistema)
+            if (!targetMonth) {
+                const currentMonthIndex = new Date().getMonth();
+                const nextMonthIndex = (currentMonthIndex + 1) % 12;
+                vencimientosActiveMonth = MONTHS[nextMonthIndex];
+            } else {
+                vencimientosActiveMonth = targetMonth;
+            }
+
+            // 3. Mostrar modal
+            const modal = document.getElementById('vencimientosModal');
+            if (modal) modal.classList.add('show');
+
+            // 4. Poblar selectores de filtros del modal
+            populateVencFilters();
+
+            // 5. Cargar y renderizar los vencimientos
+            renderVencimientosList();
+        }
+
+        function closeVencimientosModal() {
+            const modal = document.getElementById('vencimientosModal');
+            if (modal) modal.classList.remove('show');
+        }
+
+        function populateVencFilters() {
+            const selectProp = document.getElementById('vencSelectProperty');
+            if (selectProp) {
+                selectProp.value = vencimientosActiveProperty;
+            }
+
+            const selectMonth = document.getElementById('vencSelectMonth');
+            if (selectMonth) {
+                selectMonth.innerHTML = '';
+                MONTHS.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m;
+                    opt.textContent = m;
+                    selectMonth.appendChild(opt);
+                });
+                selectMonth.value = vencimientosActiveMonth;
+            }
+        }
+
+        function changeVencProperty(prop) {
+            vencimientosActiveProperty = prop;
+            renderVencimientosList();
+        }
+
+        function changeVencMonth(month) {
+            vencimientosActiveMonth = month;
+            renderVencimientosList();
+        }
+
+        function renderVencimientosList() {
+            const subtitle = document.getElementById('vencModalSubtitle');
+            if (subtitle) {
+                subtitle.innerHTML = `Servicios de <strong>${vencimientosActiveProperty.toUpperCase()}</strong> en <strong>${vencimientosActiveMonth}</strong>`;
+            }
+
+            const listBody = document.getElementById('vencModalBody');
+            if (!listBody) return;
+            listBody.innerHTML = '';
+
+            // Buscar fila del mes seleccionado en la base de datos
+            const rowData = database.find(r => r.Mes && r.Mes.trim().toLowerCase() === vencimientosActiveMonth.trim().toLowerCase()) 
+                            || { "Mes": vencimientosActiveMonth };
+
+            // Obtener columnas de la propiedad seleccionada
+            const groupCols = PROPERTY_COLUMN_GROUPS[vencimientosActiveProperty] || TAX_COLUMNS;
+
+            let countUnpaid = 0;
+            let countScheduled = 0;
+            let countPaid = 0;
+            let totalEstimated = 0;
+
+            groupCols.forEach((col, index) => {
+                let val = rowData[col];
+                let status = 'unpaid'; // unpaid, scheduled, paid
+                let registeredVal = 0;
+                let suggestedVal = 0;
+
+                // Evaluar valor de la celda
+                if (val === undefined || val === null || val === "" || val === "-") {
+                    status = 'unpaid';
+                    suggestedVal = 0;
+                    countUnpaid++;
+                    totalEstimated += suggestedVal;
+                } else {
+                    const strVal = String(val).trim().toLowerCase();
+                    if (strVal.startsWith('p ')) {
+                        status = 'scheduled';
+                        const pAmount = parseFloat(strVal.replace('p ', '').trim());
+                        registeredVal = isNaN(pAmount) ? 0 : pAmount;
+                        suggestedVal = registeredVal;
+                        countScheduled++;
+                        totalEstimated += suggestedVal;
+                    } else {
+                        const numericVal = parseFloat(val);
+                        if (isNaN(numericVal) || numericVal === 0) {
+                            status = 'unpaid';
+                            suggestedVal = 0;
+                            countUnpaid++;
+                            totalEstimated += suggestedVal;
+                        } else {
+                            status = 'paid';
+                            registeredVal = numericVal;
+                            suggestedVal = numericVal;
+                            countPaid++;
+                        }
+                    }
+                }
+
+                // Generar HTML del item
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `venc-item ${status === 'paid' ? 'paid-item' : (status === 'scheduled' ? 'pending-item' : '')}`;
+
+                // Badge y nombre
+                let badgeHtml = '';
+                let displayValHtml = '';
+                if (status === 'paid') {
+                    badgeHtml = `<span class="venc-item-badge badge-done"><i class="fa-solid fa-circle-check"></i> Pagado: $${registeredVal.toLocaleString('es-AR', { maximumFractionDigits: 0 })}</span>`;
+                } else if (status === 'scheduled') {
+                    badgeHtml = `<span class="venc-item-badge badge-scheduled"><i class="fa-solid fa-clock"></i> Pendiente: $${registeredVal.toLocaleString('es-AR', { maximumFractionDigits: 0 })}</span>`;
+                } else {
+                    badgeHtml = `<span class="venc-item-badge badge-unpaid"><i class="fa-solid fa-circle-xmark"></i> Sin Pagar</span>`;
+                }
+
+                const uniqueInputId = `vencInput_${vencimientosActiveProperty}_${index}`;
+
+                itemDiv.innerHTML = `
+                    <div class="venc-item-info">
+                        <div class="venc-item-name">${col}</div>
+                        ${badgeHtml}
+                    </div>
+                    <div>
+                        <input type="number" 
+                               id="${uniqueInputId}" 
+                               class="venc-item-input" 
+                               value="${suggestedVal > 0 ? suggestedVal : ''}" 
+                               placeholder="Ej: 35000" 
+                               ${status === 'paid' ? 'disabled' : ''}>
+                    </div>
+                    <div>
+                        <button class="btn-venc-item-pay" 
+                                onclick="paySingleVencimiento('${col}', '${uniqueInputId}')"
+                                ${status === 'paid' ? 'disabled' : ''}>
+                            ${status === 'paid' ? '<i class="fa-solid fa-circle-check"></i> Listo' : '<i class="fa-solid fa-credit-card"></i> Pagar'}
+                        </button>
+                    </div>
+                `;
+                listBody.appendChild(itemDiv);
+            });
+
+            // Actualizar resumen de la modal
+            document.getElementById('vencSumUnpaid').textContent = countUnpaid;
+            document.getElementById('vencSumScheduled').textContent = countScheduled;
+            document.getElementById('vencSumPaid').textContent = countPaid;
+            document.getElementById('vencSumTotal').textContent = `$${totalEstimated.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`;
+        }
+
+        async function paySingleVencimiento(columna, inputId) {
+            const inputEl = document.getElementById(inputId);
+            if (!inputEl) return;
+
+            const amount = parseFloat(inputEl.value) || 0;
+            if (amount <= 0) {
+                showToast('Monto Inválido', 'Ingresa un monto mayor a 0 para registrar el pago.', 'error');
+                return;
+            }
+
+            // Registrar el pago
+            await updateTaxCell(vencimientosActiveMonth, columna, amount);
+            
+            // Recargar la lista del modal
+            renderVencimientosList();
+        }
+
+        async function payAllVencimientos() {
+            const groupCols = PROPERTY_COLUMN_GROUPS[vencimientosActiveProperty] || TAX_COLUMNS;
+            
+            // Recopilar todos los elementos que no están pagados y tienen un monto sugerido válido
+            const itemsToPay = [];
+            
+            const rowData = database.find(r => r.Mes && r.Mes.trim().toLowerCase() === vencimientosActiveMonth.trim().toLowerCase()) 
+                            || { "Mes": vencimientosActiveMonth };
+
+            groupCols.forEach((col, index) => {
+                const val = rowData[col];
+                const inputId = `vencInput_${vencimientosActiveProperty}_${index}`;
+                const inputEl = document.getElementById(inputId);
+                
+                // Determinar si ya está pagado en la base de datos real
+                let isPaid = false;
+                if (val !== undefined && val !== null && val !== "" && val !== "-") {
+                    const strVal = String(val).trim().toLowerCase();
+                    if (!strVal.startsWith('p ')) {
+                        const numericVal = parseFloat(val);
+                        if (!isNaN(numericVal) && numericVal > 0) {
+                            isPaid = true;
+                        }
+                    }
+                }
+
+                if (!isPaid && inputEl) {
+                    const amount = parseFloat(inputEl.value) || 0;
+                    if (amount > 0) {
+                        itemsToPay.push({ col, amount });
+                    }
+                }
+            });
+
+            if (itemsToPay.length === 0) {
+                showToast('Sin Acciones', 'No hay servicios pendientes con montos sugeridos válidos.', 'error');
+                return;
+            }
+
+            // Confirmar acción
+            const confirmed = await showCustomConfirm(
+                'Registrar pagos masivos',
+                `¿Estás seguro de que quieres registrar todos los ${itemsToPay.length} pagos pendientes del mes de ${vencimientosActiveMonth}?`,
+                false
+            );
+            if (!confirmed) return;
+
+            setProcessing(true);
+
+            // Ejecutar secuencialmente para no saturar las solicitudes paralelas
+            for (const item of itemsToPay) {
+                try {
+                    await updateTaxCell(vencimientosActiveMonth, item.col, item.amount);
+                } catch (e) {
+                    console.error(`Error al registrar pago para ${item.col}:`, e);
+                }
+            }
+
+            setProcessing(false);
+            showToast('¡Proceso Terminado!', `Se registraron los pagos de forma masiva.`, 'success');
+            
+            // Recargar lista
+            renderVencimientosList();
+        }
+
+        // ====================================================
+        // DIÁLOGOS DE CONFIRMACIÓN PERSONALIZADOS PREMIUM
+        // ====================================================
+        function showCustomConfirm(title, message, isDanger = true) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                const titleEl = document.getElementById('confirmTitle');
+                const msgEl = document.getElementById('confirmMessage');
+                const iconEl = document.getElementById('confirmIcon');
+                const acceptBtn = document.getElementById('btnConfirmAccept');
+                const cancelBtn = document.getElementById('btnConfirmCancel');
+
+                if (!modal) {
+                    // Fallback de emergencia
+                    resolve(window.confirm(message));
+                    return;
+                }
+
+                titleEl.textContent = title;
+                msgEl.textContent = message;
+
+                // Configurar tipo de alerta
+                if (isDanger) {
+                    iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                    iconEl.className = 'confirm-icon confirm-danger';
+                    acceptBtn.style.background = '#ef4444';
+                    acceptBtn.style.borderColor = '#ef4444';
+                    acceptBtn.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.25)';
+                    acceptBtn.innerHTML = '<i class="fa-solid fa-trash"></i> Eliminar';
+                } else {
+                    iconEl.innerHTML = '<i class="fa-solid fa-circle-question"></i>';
+                    iconEl.className = 'confirm-icon confirm-info';
+                    acceptBtn.style.background = '#10b981';
+                    acceptBtn.style.borderColor = '#10b981';
+                    acceptBtn.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.25)';
+                    acceptBtn.innerHTML = '<i class="fa-solid fa-check"></i> Aceptar';
+                }
+
+                modal.classList.add('show');
+
+                // Handlers locales
+                const onAccept = () => {
+                    cleanup();
+                    resolve(true);
+                };
+
+                const onCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                const cleanup = () => {
+                    modal.classList.remove('show');
+                    acceptBtn.removeEventListener('click', onAccept);
+                    cancelBtn.removeEventListener('click', onCancel);
+                };
+
+                acceptBtn.addEventListener('click', onAccept);
+                cancelBtn.addEventListener('click', onCancel);
+            });
+        }
     </script>
+
+    <!-- =====================================================
+         MODAL DE CONFIRMACIÓN PERSONALIZADO (CUSTOM CONFIRM)
+    ===================================================== -->
+    <div class="cell-modal-backdrop" id="customConfirmModal" style="z-index: 10010;">
+        <div class="cell-modal-content" style="max-width: 420px; text-align: center; padding: 2rem; border-radius: 20px;">
+            <div id="confirmIcon" class="confirm-icon confirm-danger" style="font-size: 3rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; height: 70px;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;" id="confirmTitle">Confirmar Acción</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.5rem; padding: 0 10px;" id="confirmMessage">¿Estás seguro?</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn-modal-cancel" id="btnConfirmCancel" style="padding: 10px 20px; font-weight: 600; border-radius: 8px; font-size: 0.85rem; min-width: 100px;">Cancelar</button>
+                <button class="btn-submit" id="btnConfirmAccept" style="padding: 10px 20px; font-weight: 700; border-radius: 8px; font-size: 0.85rem; min-width: 100px;">Aceptar</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

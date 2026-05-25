@@ -69,11 +69,13 @@ const SmartNLPParser = {
         let detectedTax = null;
         let detectedAmount = null;
         let detectedProperty = null;
+        let detectedPropertyKey = null;
 
         // 1. Detect property (Roca, Casa, etc.)
         for (const prop of this.PROPERTIES) {
             if (text.includes(prop.key)) {
                 detectedProperty = prop.label;
+                detectedPropertyKey = prop.key;
                 break;
             }
         }
@@ -131,6 +133,10 @@ const SmartNLPParser = {
             // B. Coincidencia por palabras individuales
             const words = normCol.replace(/[()./]/g, ' ').split(/\s+/).filter(w => w.length > 2);
             words.forEach(w => {
+                // Si la palabra coincide con el nombre de la propiedad detectada, no la sumamos al score de tax para evitar falsos positivos
+                if (detectedProperty && (w === detectedProperty.toLowerCase() || detectedProperty.toLowerCase().includes(w))) {
+                    return;
+                }
                 const regexW = new RegExp('\\b' + w + '\\b');
                 if (regexW.test(text)) {
                     score += 5;
@@ -165,6 +171,18 @@ const SmartNLPParser = {
                         detectedTaxes = filtered;
                         break;
                     }
+                }
+            }
+        }
+
+        // Filtrar por propiedad si se detectó una y hay múltiples candidatos de tax
+        if (detectedTaxes.length > 1 && detectedPropertyKey) {
+            const groups = window.PROPERTY_COLUMN_GROUPS || {};
+            const allowedCols = groups[detectedPropertyKey] || [];
+            if (allowedCols.length > 0) {
+                const propFiltered = detectedTaxes.filter(c => allowedCols.includes(c));
+                if (propFiltered.length > 0) {
+                    detectedTaxes = propFiltered;
                 }
             }
         }
@@ -625,7 +643,7 @@ class BotAsistente {
                         <button disabled title="Alquileres (Próximamente)"><i class="fa-solid fa-house-user"></i></button>
                         <button disabled title="Limpieza (Próximamente)"><i class="fa-solid fa-broom"></i></button>
                     </div>
-                    <button class="bot-close" onclick="window.botInstance.toggleWindow()"><i class="fa-solid fa-xmark"></i></button>
+                    <button class="bot-close" onclick="window.botInstance.closeAndClearChat()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="bot-messages" id="botMessages"></div>
                 <div class="bot-input-area">
@@ -645,15 +663,22 @@ class BotAsistente {
 
         // Mensaje de bienvenida con estilo WhatsApp
         setTimeout(() => {
-            this.appendMessage(
-                `¡Buenas! 👋 Soy tu asistente personal de impuestos.<br>` +
-                `Contame, ¿en qué te puedo dar una mano hoy? Podés preguntarme cosas como:<br><br>` +
-                `💡 <i>"¿Qué tengo pendiente este mes?"</i><br>` +
-                `💡 <i>"¿Cuánto gasté en Luz en el año?"</i><br>` +
-                `💡 <i>"¿Cuál fue mi mayor gasto?"</i>`,
-                'bot'
-            );
+            this.sendWelcomeMessage();
         }, 100);
+    }
+
+    sendWelcomeMessage() {
+        const msgs = document.getElementById('botMessages');
+        if (msgs) msgs.innerHTML = '';
+        
+        this.appendMessage(
+            `¡Buenas! 👋 Soy tu asistente personal de impuestos.<br>` +
+            `Contame, ¿en qué te puedo dar una mano hoy? Podés preguntarme cosas como:<br><br>` +
+            `💡 <i>"¿Qué tengo pendiente este mes?"</i><br>` +
+            `💡 <i>"¿Cuánto gasté en Luz en el año?"</i><br>` +
+            `💡 <i>"¿Cuál fue mi mayor gasto?"</i>`,
+            'bot'
+        );
     }
 
     toggleWindow() {
@@ -663,6 +688,26 @@ class BotAsistente {
             document.getElementById('botInput').focus();
             this.scrollToBottom();
         }
+    }
+
+    closeAndClearChat() {
+        // 1. Cerrar la ventana del bot
+        const win = document.getElementById('botWindow');
+        if (win) {
+            win.classList.remove('show');
+        }
+
+        // 2. Limpiar el input
+        const input = document.getElementById('botInput');
+        if (input) {
+            input.value = '';
+        }
+
+        // 3. Limpiar el contexto conversacional
+        this.context = null;
+
+        // 4. Reiniciar los mensajes al estado inicial de bienvenida
+        this.sendWelcomeMessage();
     }
 
     sendPreset(text) {
@@ -840,7 +885,7 @@ class BotAsistente {
                             `• Servicio: <strong>${taxName}</strong><br>` +
                             `• Mes: <strong>${month}</strong><br>` +
                             `• Monto: <strong>$${amount.toLocaleString('es-AR')}</strong><br><br>` +
-                            `Ya se guardó en Google Sheets y podés ver cómo se actualiza el tablero.`;
+                            `Ya se guardó en el sistema y podés ver cómo se actualiza el tablero.`;
                     }
                 } else {
                     // Si no escribió un número pero introdujo otra orden o consulta, cancelamos el contexto
@@ -861,7 +906,7 @@ class BotAsistente {
                         `• Servicio: <strong>${taxName}</strong><br>` +
                         `• Mes: <strong>${month}</strong><br>` +
                         `• Monto: <strong>$${amount.toLocaleString('es-AR')}</strong><br><br>` +
-                        `Ya se subió a Google Sheets y se actualizó en tu pantalla.`;
+                        `Ya se subió al sistema y se actualizó en tu pantalla.`;
                 } else if (negative.some(word => q.includes(word))) {
                     const { taxName, month } = this.context;
                     this.context = null; // Limpiar contexto
@@ -964,13 +1009,10 @@ class BotAsistente {
             this.lastTopic = { tax: matchedTax, month: matchedMonth };
         }
 
-        // 1.5. Consulta de PENDIENTES AGENDADOS en un mes (ej: "tengo agendado en junio", "qué tengo pendiente en junio")
-        const hasPendingReviewKw = q.includes('agendado') || q.includes('agendados') ||
-            (q.includes('pendiente') && !parsed.detectedAmount && matchedMonth) ||
-            (q.includes('debo') && !parsed.detectedAmount && matchedMonth) ||
-            q.includes('que tengo en') || q.includes('que hay en');
+        // 1.5. Consulta de PENDIENTES AGENDADOS en un mes (ej: "tengo agendado en junio")
+        const hasPendingReviewKw = q.includes('agendado') || q.includes('agendados');
         if (hasPendingReviewKw && matchedMonth) {
-            return this.handlePendingReview(matchedMonth);
+            return this.handlePendingReview(matchedMonth, matchedProperty);
         }
 
         // 2. Comando Borrar / Eliminar
@@ -1474,7 +1516,7 @@ class BotAsistente {
                     if (detectedProperty) reply += `• Propiedad: <strong>${detectedProperty}</strong><br>`;
                     reply += `• Mes: <strong>${finalMonth}</strong><br>` +
                         `• Monto pagado: <strong>$${detectedAmount.toLocaleString('es-AR')}</strong><br><br>` +
-                        `Guardado en Google Sheets y actualizado en el tablero. ✅`;
+                        `Guardado en el sistema y actualizado en el tablero. ✅`;
                 }
                 return reply;
             }
@@ -1579,7 +1621,7 @@ class BotAsistente {
     // ====================================================
     // HANDLER: Revisar pendientes agendados en un mes
     // ====================================================
-    handlePendingReview(month) {
+    handlePendingReview(month, propertyName = null) {
         const data = window.database || [];
         const row = data.find(r => r.Mes && r.Mes.trim().toLowerCase() === month.trim().toLowerCase());
 
@@ -1589,7 +1631,10 @@ class BotAsistente {
 
         // Buscar todas las celdas con valor que empieza con "p " (pendiente agendado)
         const pendingItems = [];
-        const taxes = window.TAX_COLUMNS || [];
+        let activeTab = propertyName ? propertyName.toLowerCase() : (window.activePropertyTab || 'roca');
+        const activeGroups = window.PROPERTY_COLUMN_GROUPS || {};
+        const taxes = activeGroups[activeTab] || window.TAX_COLUMNS || [];
+
         taxes.forEach(tax => {
             const val = row[tax];
             if (val && typeof val === 'string' && val.trim().toLowerCase().startsWith('p ')) {

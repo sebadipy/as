@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablero Inteligente - Gestión de Limpieza</title>
+    <!-- Google Fonts: Inter & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0d9488; /* Teal */
+            --primary-light: #2dd4bf;
+            --primary-dark: #115e59;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --warning: #f59e0b;
+            --background: #f1f5f9;
+            --surface: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #cbd5e1;
+            --radius: 16px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 50px;
+            overflow-x: hidden;
+        }
+
+        /* Header Premium */
+        header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, #14b8a6 100%);
+            color: white;
+            padding: 1.5rem 5%;
+            box-shadow: 0 4px 20px rgba(13, 148, 136, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .header-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo-icon {
+            background: rgba(255, 255, 255, 0.15);
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-title-group h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-title-group p {
+            font-size: 0.85rem;
+            color: #ccfbf1;
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-header {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .btn-header:hover {
+            background: white;
+            color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary-action {
+            background: #ffffff;
+            color: var(--primary-dark);
+            border: none;
+        }
+
+        .btn-primary-action:hover {
+            background: #f0fdfa;
+            color: var(--primary);
+        }
+
+        /* Container & Layout */
+        .container {
+            max-width: 1400px;
+            width: 95%;
+            margin: 2rem auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            flex: 1;
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: var(--primary);
+        }
+
+        .kpi-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .kpi-card.payments .kpi-icon { background: rgba(13, 148, 136, 0.1); color: var(--primary); }
+        .kpi-card.hours .kpi-icon { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .kpi-card.staff .kpi-icon { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+
+        .kpi-card.hours::after { background: var(--warning); }
+        .kpi-card.staff::after { background: var(--success); }
+
+        .kpi-info p {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .kpi-info h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-top: 4px;
+            color: var(--text-primary);
+        }
+
+        /* Filter Controls */
+        .controls-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-group {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .input-search, .select-month {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            outline: none;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            transition: border-color 0.2s;
+        }
+
+        .input-search {
+            flex: 1;
+        }
+
+        .input-search:focus, .select-month:focus {
+            border-color: var(--primary);
+        }
+
+        .select-month {
+            min-width: 150px;
+            cursor: pointer;
+        }
+
+        /* Table Card & Data Grid */
+        .table-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .table-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+        }
+
+        .table-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Card Grid Layout (Form-like) */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: #fafafa;
+        }
+
+        .record-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .record-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .record-card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to right, #f8fafc, #f1f5f9);
+        }
+
+        .record-card-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .record-card-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-family: monospace;
+        }
+
+        .record-card-body {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .record-field {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .record-field:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .field-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .field-value {
+            color: var(--text-primary);
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .record-card-footer {
+            padding: 1rem 1.25rem;
+            background: #f0fdfa;
+            border-top: 1px solid #ccfbf1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-label {
+            color: var(--primary-dark);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .total-value {
+            color: #0f766e;
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .cell-month {
+            font-weight: 500;
+            color: var(--primary-dark);
+            background: rgba(13, 148, 136, 0.08);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+
+        .cell-antiguedad-yes {
+            color: var(--danger);
+            font-size: 1.1rem;
+        }
+
+        .cell-antiguedad-no {
+            color: var(--success);
+            font-size: 1.1rem;
+        }
+
+        .cell-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-action.edit {
+            background: rgba(13, 148, 136, 0.1);
+            color: var(--primary);
+        }
+        .btn-action.edit:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-action.delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        .btn-action.delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #cbd5e1;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Status Indicator (Processing Overlay) */
+        .processing-indicator {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal Dialog Backdrops & Layouts */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-backdrop.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 680px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-backdrop.show .modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .modal-close:hover { color: var(--text-primary); }
+
+        .modal-body {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .form-group-full {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            outline: none;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+            color: var(--text-primary);
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+        }
+
+        .form-group input[readonly] {
+            background-color: #e2e8f0;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            font-weight: 700;
+            cursor: not-allowed;
+        }
+
+        .checkbox-label-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            user-select: none;
+        }
+
+        .checkbox-label-group input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .checkbox-label-group span {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Formulas info badge */
+        .formula-info-badge {
+            font-size: 0.72rem;
+            color: var(--primary-dark);
+            background: #e6fcf5;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: monospace;
+            margin-top: 2px;
+            display: inline-block;
+        }
+
+        .modal-footer {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background-color: #fafafa;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+
+        .btn-modal-cancel {
+            background: #f1f5f9;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-modal-cancel:hover { background: #e2e8f0; }
+
+        .btn-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+        }
+        .btn-submit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--surface);
+            border-radius: 10px;
+            padding: 12px 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-width: 280px;
+            max-width: 400px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+
+        .toast-icon { font-size: 1.1rem; }
+        .toast.success .toast-icon { color: var(--success); }
+        .toast.error .toast-icon { color: var(--danger); }
+
+        .toast-content h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .toast-content p {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* Confirm Dialog Icons */
+        .confirm-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 70px;
+        }
+        .confirm-danger { color: var(--danger); }
+        .confirm-info { color: var(--primary); }
+
+
+        /* Inline Form Layout */
+        .form-grid {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+
+        .form-actions {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            background-color: #fafafa;
+        }
+        
+        .form-actions .btn-submit,
+        .form-actions .btn-email {
+            flex: 1;
+            min-width: 250px;
+            padding: 14px 24px;
+            font-size: 1.05rem;
+        }
+        
+        .btn-email {
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-email:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        /* ===== MOBILE RESPONSIVE (al final para sobreescribir) ===== */
+        @media (max-width: 900px) {
+
+            body {
+                padding-bottom: 80px;
+            }
+
+            header {
+                padding: 1rem 4%;
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+            .header-logo-group {
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            .header-title-group h1 { font-size: 1.2rem; }
+            .header-title-group p  { font-size: 0.75rem; }
+
+            .header-actions {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .btn-header {
+                padding: 8px 14px;
+                font-size: 0.82rem;
+            }
+
+            .container {
+                width: 100%;
+                padding: 0 10px;
+                margin: 0.75rem auto;
+                gap: 1rem;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+            }
+
+            .kpi-card  { padding: 0.9rem; gap: 0.65rem; }
+            .kpi-icon  { width: 38px; height: 38px; font-size: 1rem; }
+            .kpi-info h3 { font-size: 1.1rem; }
+            .kpi-info p  { font-size: 0.7rem; }
+
+            /* Formulario en una sola columna */
+            .form-grid {
+                grid-template-columns: 1fr !important;
+                padding: 0.9rem;
+                gap: 0.9rem;
+            }
+
+            .form-group-full {
+                grid-column: 1 !important;
+            }
+
+            .form-group label { font-size: 0.75rem; }
+
+            .form-group input[type="text"],
+            .form-group input[type="number"],
+            .form-group select {
+                padding: 12px;
+                font-size: 1rem;
+            }
+
+            /* Checkbox label no se corta */
+            .checkbox-label-group {
+                flex-wrap: wrap;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .checkbox-label-group span {
+                font-size: 0.8rem;
+                line-height: 1.4;
+                white-space: normal;
+                word-break: break-word;
+                flex: 1;
+                min-width: 0;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                gap: 10px;
+                padding: 1rem;
+            }
+
+            .form-actions .btn-submit,
+            .form-actions .btn-email {
+                min-width: unset !important;
+                width: 100%;
+                padding: 14px;
+                font-size: 1rem;
+            }
+
+            .formula-info-badge { font-size: 0.68rem; }
+
+            .table-card { border-radius: 10px; }
+        }
+
+        @media (max-width: 400px) {
+            .kpi-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Processing Indicator Overlay -->
+    <div class="processing-indicator" id="procIndicator">
+        <div class="spinner"></div>
+        <span id="procText">Guardando cambios...</span>
+    </div>
+
+    <!-- Header Panel -->
+    <header>
+        <div class="header-logo-group">
+            <div class="header-logo-icon">
+                <i class="fa-solid fa-broom"></i>
+            </div>
+            <div class="header-title-group">
+                <h1>Gestión de Limpieza</h1>
+                <p>Cálculo de haberes, antigüedad y licencias</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="index.html" class="btn-header">
+                <i class="fa-solid fa-arrow-left"></i> Volver al Panel
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        
+        <!-- KPI Row -->
+        <div class="kpi-grid">
+            <div class="kpi-card payments">
+                <div class="kpi-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                <div class="kpi-info">
+                    <p>Total a Pagar del Mes</p>
+                    <h3 id="kpiTotalPayments">$0</h3>
+                </div>
+            </div>
+            <div class="kpi-card hours">
+                <div class="kpi-icon"><i class="fa-solid fa-business-time"></i></div>
+                <div class="kpi-info">
+                    <p>Total Horas Estimadas</p>
+                    <h3 id="kpiTotalHours">0 hrs</h3>
+                </div>
+            </div>
+            <div class="kpi-card staff">
+                <div class="kpi-icon"><i class="fa-solid fa-user-tie"></i></div>
+                <div class="kpi-info">
+                    <p>Personal Liquidado</p>
+                    <h3 id="kpiStaffCount">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Form Card -->
+        <div class="table-card" id="mainFormCard" style="display: none;">
+            <div class="table-header">
+                <h2><i class="fa-solid fa-file-invoice-dollar"></i> Liquidación Actual</h2>
+            </div>
+            
+            <div class="form-grid">
+                <!-- Row ID (Hidden or Read-only) -->
+                <input type="hidden" id="formId">
+
+                <!-- Personal Name -->
+                <div class="form-group form-group-full">
+                    <label for="formPersonal">Nombre del Personal</label>
+                    <input type="text" id="formPersonal" placeholder="Ej: Elsa Noemi Bravo" required>
+                </div>
+
+                <!-- Mes -->
+                <div class="form-group">
+                    <label for="formMes">Mes de Liquidación</label>
+                    <select id="formMes" onchange="runCalculations()">
+                        <option value="Enero">Enero</option>
+                        <option value="Febrero">Febrero</option>
+                        <option value="Marzo">Marzo</option>
+                        <option value="Abril">Abril</option>
+                        <option value="Mayo" selected>Mayo</option>
+                        <option value="Junio">Junio</option>
+                        <option value="Julio">Julio</option>
+                        <option value="Agosto">Agosto</option>
+                        <option value="Septiembre">Septiembre</option>
+                        <option value="Octubre">Octubre</option>
+                        <option value="Noviembre">Noviembre</option>
+                        <option value="Diciembre">Diciembre</option>
+                    </select>
+                </div>
+
+                <!-- Valor Hora -->
+                <div class="form-group">
+                    <label for="formValorHora">Valor de la Hora ($)</label>
+                    <input type="number" step="0.01" id="formValorHora" placeholder="3547.45" oninput="runCalculations()">
+                </div>
+
+                <!-- Horas Semanales -->
+                <div class="form-group">
+                    <label for="formHorasSemanales">Horas Semanales</label>
+                    <input type="number" step="1" id="formHorasSemanales" placeholder="8" oninput="runCalculations()">
+                </div>
+
+                <!-- Antiguedad (años) -->
+                <div class="form-group">
+                    <label for="formAntiguedad">Antigüedad (Años)</label>
+                    <input type="number" step="1" id="formAntiguedad" placeholder="5" oninput="runCalculations()">
+                </div>
+
+                <!-- Antigüedad Sí / No (Excluir Antigüedad Checkbox) -->
+                <div class="form-group form-group-full">
+                    <label class="checkbox-label-group">
+                        <input type="checkbox" id="formAntiguedadSiNo" onchange="runCalculations()">
+                        <span>Excluir cálculo de antigüedad (Marcar como "SI" excluido / FALSE en spreadsheet)</span>
+                    </label>
+                </div>
+
+                <!-- Valor Antigüedad (Read Only / Calculated) -->
+                <div class="form-group">
+                    <label for="formValorAntiguedad">Monto Antigüedad ($)</label>
+                    <input type="number" id="formValorAntiguedad" readonly>
+                    <span class="formula-info-badge">Antiguedad ? 0 : Horas * ValorHora * 5% * Años</span>
+                </div>
+
+                <!-- Viajes Colectivos -->
+                <div class="form-group">
+                    <label for="formViajesColectivos">Viajes Colectivos ($)</label>
+                    <input type="number" step="0.01" id="formViajesColectivos" placeholder="2480" oninput="runCalculations()">
+                </div>
+
+                <!-- Deposito Semanal (Read Only / Calculated) -->
+                <div class="form-group">
+                    <label for="formDeposito">Depósito Semanal ($)</label>
+                    <input type="number" id="formDeposito" readonly>
+                    <span class="formula-info-badge">(ValorHora * Horas) + Viajes</span>
+                </div>
+
+                <!-- Días Licencia Anual -->
+                <div class="form-group">
+                    <label for="formDiasLicencia">Días Licencia Anual</label>
+                    <input type="number" step="1" id="formDiasLicencia" placeholder="28" oninput="runCalculations()">
+                </div>
+
+                <!-- Licencia Gozada -->
+                <div class="form-group">
+                    <label for="formLicenciaGozada">Licencia Gozada (Días)</label>
+                    <input type="number" step="1" id="formLicenciaGozada" placeholder="7" oninput="runCalculations()">
+                </div>
+
+                <!-- Licencia Restante (Read Only / Calculated) -->
+                <div class="form-group">
+                    <label for="formLicenciaRestante">Licencia Restante (Días)</label>
+                    <input type="number" id="formLicenciaRestante" readonly>
+                    <span class="formula-info-badge">LicenciaAnual - LicenciaGozada</span>
+                </div>
+
+                <!-- Fechas Gozadas -->
+                <div class="form-group">
+                    <label for="formFechasGozadas">Fechas Gozadas (Detalle)</label>
+                    <input type="text" id="formFechasGozadas" placeholder="del 4 al 10/05/2026">
+                </div>
+
+                <!-- Pago Mensual (Read Only / Calculated) -->
+                <div class="form-group form-group-full">
+                    <label for="formPagoMensual">Pago Mensual Final ($)</label>
+                    <input type="number" id="formPagoMensual" readonly style="font-size: 1.15rem; font-weight: 700; color: var(--primary-dark); background-color: #ccfbf1; border: 1px solid var(--primary); cursor: not-allowed;">
+                    <span class="formula-info-badge">(ValorHora * Horas * Semanas) + Antigüedad</span>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn-email" onclick="sendEmail()"><i class="fa-solid fa-envelope"></i> Enviar Liquidación</button>
+                <button class="btn-submit" onclick="submitForm()"><i class="fa-solid fa-floppy-disk"></i> Actualizar Registro</button>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border);">
+            <i class="fa-solid fa-broom"></i>
+            <p>No hay registro de limpieza actual.</p>
+            <button class="btn-submit" onclick="initNewRecord()">Crear Registro</button>
+        </div>
+
+    <!-- CUSTOM CONFIRM DIALOG MODAL -->
+    <div class="modal-backdrop" id="customConfirmModal" style="z-index: 10010;">
+        <div class="modal-content" style="max-width: 420px; text-align: center; padding: 2rem; border-radius: 20px;">
+            <div id="confirmIcon" class="confirm-icon confirm-danger">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;" id="confirmTitle">Confirmar Acción</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.5rem; padding: 0 10px;" id="confirmMessage">¿Estás seguro?</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="btn-modal-cancel" id="btnConfirmCancel" style="padding: 10px 20px; font-weight: 600; min-width: 100px;">Cancelar</button>
+                <button class="btn-submit" id="btnConfirmAccept" style="padding: 10px 20px; font-weight: 700; min-width: 100px;">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- CONFIGURATION & JAVASCRIPT LOGIC -->
+    <script src="config.js"></script>
+    <script>
+        // SCRIPT_URL importado de config.js
+        const API_URL = CONFIG.SCRIPT_URL;
+
+        // Semilla de datos offline de demostración basada exactamente en el spreadsheet real
+        const OFFLINE_SEED = [
+            {
+                "ID": "58eeb964",
+                "Personal": "Elsa Noemi Bravo",
+                "Mes": "Mayo",
+                "Valor hora": 3547.45,
+                "Horas_semanales": 8,
+                "Antigüedad": 5,
+                "Antiguedad_si_no": false,
+                "valor_antiguedad": 7094.9,
+                "Viajes_Colectivos": 2480,
+                "Deposito": 30859.6,
+                "Dias_licencia_anual": 28,
+                "Licencia_gozada": 7,
+                "Licencia_restante": 21,
+                "Fechas_gozadas": "del 4 al 10/05/2026",
+                "Pago_Mensual": 148992.9
+            }
+        ];
+
+        let cleaningData = [];
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCleaningData();
+        });
+
+        // Utilidad: busca una clave en un objeto de forma flexible (sin acentos, case-insensitive)
+        function flexGet(row, key) {
+            // Intento directo
+            if (row[key] !== undefined) return row[key];
+            // Normalizar la key buscada
+            const normalize = (s) => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+            const normKey = normalize(key);
+            for (const k of Object.keys(row)) {
+                if (normalize(k) === normKey) return row[k];
+            }
+            return undefined;
+        }
+
+        // Normaliza mes de "MAYO" → "Mayo", "enero" → "Enero", etc.
+        function normalizeMes(mes) {
+            if (!mes) return "Enero";
+            const s = String(mes).trim().toLowerCase();
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+
+        // Carga los datos desde Sheets o fallback local
+        async function loadCleaningData() {
+            setProcessing(true, 'Cargando datos...');
+            try {
+                const url = `${API_URL}?action=read&sheetName=BD%20AS_LIMPIEZA&_t=${Date.now()}`;
+                console.log("[Limpieza] Fetching:", url);
+                const response = await fetch(url);
+                const res = await response.json();
+                console.log("[Limpieza] Respuesta backend:", JSON.stringify(res).substring(0, 500));
+                console.log("[Limpieza] Headers recibidos:", res.headers);
+                
+                if (res.status === 'success' && res.data && res.data.length > 0) {
+                    console.log("[Limpieza] Fila cruda #1:", JSON.stringify(res.data[0]));
+                    cleaningData = res.data.map(row => parseBackendRow(row));
+                    console.log("[Limpieza] Fila parseada #1:", JSON.stringify(cleaningData[0]));
+                    showToast('Datos Cargados', 'Sincronizado con la planilla online con éxito.', 'success');
+                } else {
+                    console.warn("[Limpieza] Sin datos o status no success:", res.status, res.message);
+                    useOfflineFallback('No se encontraron registros en la planilla en la nube.');
+                }
+            } catch (error) {
+                console.error("[Limpieza] Error cargando planilla:", error);
+                useOfflineFallback('Fallo al conectar con la planilla. Modo Demostración activo.');
+            } finally {
+                setProcessing(false);
+                renderTable();
+            }
+        }
+
+        // Parsea tipos del backend con búsqueda flexible de headers
+        function parseBackendRow(row) {
+            return {
+                "ID": flexGet(row, "ID") || generateShortId(),
+                "Personal": flexGet(row, "Personal") || "",
+                "Mes": normalizeMes(flexGet(row, "Mes")),
+                "Valor hora": parseFloat(flexGet(row, "Valor hora")) || 0,
+                "Horas_semanales": parseInt(flexGet(row, "Horas_semanales")) || 0,
+                "Antigüedad": parseInt(flexGet(row, "Antigüedad") ?? flexGet(row, "Antiguedad")) || 0,
+                "Antiguedad_si_no": flexGet(row, "Antiguedad_si_no") === true || String(flexGet(row, "Antiguedad_si_no") ?? "").toUpperCase() === 'TRUE' || String(flexGet(row, "Antiguedad_si_no") ?? "").toUpperCase() === 'FALSE' ? (String(flexGet(row, "Antiguedad_si_no") ?? "").toUpperCase() === 'TRUE') : false,
+                "valor_antiguedad": parseFloat(flexGet(row, "valor_antiguedad")) || 0,
+                "Viajes_Colectivos": parseFloat(flexGet(row, "Viajes_Colectivos")) || 0,
+                "Deposito": parseFloat(flexGet(row, "Deposito")) || 0,
+                "Dias_licencia_anuales": parseInt(flexGet(row, "Dias_licencia_anuales") ?? flexGet(row, "Dias_licencia_anual") ?? flexGet(row, "Dias_licencia_an")) || 0,
+                "Licencia_gozada": parseInt(flexGet(row, "Licencia_gozada")) || 0,
+                "Licencia_restante": parseInt(flexGet(row, "Licencia_restante")) || 0,
+                "Fechas_gozadas": flexGet(row, "Fechas_gozadas") || "",
+                "Pago_Mensual": parseFloat(flexGet(row, "Pago_Mensual")) || 0
+            };
+        }
+
+        function useOfflineFallback(msg) {
+            console.log("Activando fallback offline:", msg);
+            const saved = localStorage.getItem('demo_limpieza_data');
+            if (saved) {
+                cleaningData = JSON.parse(saved);
+            } else {
+                cleaningData = [...OFFLINE_SEED];
+                localStorage.setItem('demo_limpieza_data', JSON.stringify(cleaningData));
+            }
+            showToast('Modo Local (Demo)', msg, 'info');
+        }
+
+        // Renderizado de tabla y KPIs
+        function renderTable() {
+            if (cleaningData.length === 0) {
+                document.getElementById('mainFormCard').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'flex';
+                updateKPIs([]);
+            } else {
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('mainFormCard').style.display = 'flex';
+                
+                // Cargar el único registro
+                const record = cleaningData[0];
+                document.getElementById('formId').value = record.ID;
+                document.getElementById('formPersonal').value = record.Personal;
+                document.getElementById('formMes').value = record.Mes;
+                document.getElementById('formValorHora').value = record["Valor hora"];
+                document.getElementById('formHorasSemanales').value = record["Horas_semanales"];
+                document.getElementById('formAntiguedad').value = record["Antigüedad"];
+                document.getElementById('formAntiguedadSiNo').checked = record["Antiguedad_si_no"];
+                document.getElementById('formViajesColectivos').value = record["Viajes_Colectivos"];
+                document.getElementById('formDiasLicencia').value = record["Dias_licencia_anuales"];
+                document.getElementById('formLicenciaGozada').value = record["Licencia_gozada"];
+                document.getElementById('formFechasGozadas').value = record["Fechas_gozadas"];
+
+                runCalculations();
+                updateKPIs([record]);
+            }
+        }
+
+        // Calcula y renderiza los KPI cards superiores
+        function updateKPIs(data) {
+            let totalPayments = 0;
+            let totalHours = 0;
+            const uniqueStaff = new Set();
+
+            data.forEach(row => {
+                totalPayments += row.Pago_Mensual;
+                // Horas estimadas del mes = Horas semanales * Factor semanas de ese mes
+                const semanas = getWeeksInMonth(row.Mes);
+                totalHours += row.Horas_semanales * semanas;
+                uniqueStaff.add(row.Personal.trim().toLowerCase());
+            });
+
+            document.getElementById('kpiTotalPayments').textContent = `$${totalPayments.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`;
+            document.getElementById('kpiTotalHours').textContent = `${totalHours} hrs`;
+            document.getElementById('kpiStaffCount').textContent = uniqueStaff.size;
+        }
+
+
+
+        // Auxiliar: retorna 5 semanas si el mes tiene 31 días (como Mayo, etc.), si no, 4 semanas
+        function getWeeksInMonth(monthName) {
+            const normalized = monthName.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+            const longMonths = ["enero", "marzo", "mayo", "julio", "agosto", "octubre", "diciembre"];
+            return longMonths.includes(normalized) ? 5 : 4;
+        }
+
+        // Cálculos de Fórmulas Automáticas del Formulario (Ver fórmulas)
+        function runCalculations() {
+            const valorHora = parseFloat(document.getElementById('formValorHora').value) || 0;
+            const horasSemanales = parseFloat(document.getElementById('formHorasSemanales').value) || 0;
+            const antiguedadAños = parseInt(document.getElementById('formAntiguedad').value) || 0;
+            const excluirAntiguedad = document.getElementById('formAntiguedadSiNo').checked; // true si está marcado (TRUE en sheet)
+            
+            const viajesColectivos = parseFloat(document.getElementById('formViajesColectivos').value) || 0;
+            const diasLicencia = parseInt(document.getElementById('formDiasLicencia').value) || 0;
+            const licenciaGozada = parseInt(document.getElementById('formLicenciaGozada').value) || 0;
+            const mesName = document.getElementById('formMes').value;
+
+            // 1. Monto Antigüedad: (5% del básico semanal por cada año de antigüedad si no se excluye)
+            const valorAntiguedad = excluirAntiguedad ? 0 : (horasSemanales * valorHora * 0.05 * antiguedadAños);
+            document.getElementById('formValorAntiguedad').value = valorAntiguedad.toFixed(2);
+
+            // 2. Depósito Semanal: Básico semanal (Horas * Valor hora) + Viajes
+            const deposito = (valorHora * horasSemanales) + viajesColectivos;
+            document.getElementById('formDeposito').value = deposito.toFixed(2);
+
+            // 3. Licencia Restante: Licencia anual - Licencia gozada
+            const licenciaRestante = diasLicencia - licenciaGozada;
+            document.getElementById('formLicenciaRestante').value = licenciaRestante;
+
+            // 4. Pago Mensual Final: (Valor hora * Horas semanales * Semanas) + valor_antiguedad
+            const semanas = getWeeksInMonth(mesName);
+            const pagoMensual = (valorHora * horasSemanales * semanas) + valorAntiguedad;
+            document.getElementById('formPagoMensual').value = Math.max(0, pagoMensual).toFixed(2);
+        }
+
+        function initNewRecord() {
+            document.getElementById('formId').value = "";
+            document.getElementById('formPersonal').value = "Elsa Noemi Bravo";
+            document.getElementById('formMes').value = "Mayo";
+            document.getElementById('formValorHora').value = "3547.45";
+            document.getElementById('formHorasSemanales').value = "8";
+            document.getElementById('formAntiguedad').value = "5";
+            document.getElementById('formAntiguedadSiNo').checked = false;
+            document.getElementById('formViajesColectivos').value = "2480";
+            document.getElementById('formDiasLicencia').value = "28";
+            document.getElementById('formLicenciaGozada').value = "7";
+            document.getElementById('formFechasGozadas').value = "";
+            
+            runCalculations();
+
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('mainFormCard').style.display = 'flex';
+            document.getElementById('mainFormCard').style.flexDirection = 'column';
+        }
+
+        // Envío de Formulario
+        async function submitForm() {
+            const personal = document.getElementById('formPersonal').value.trim();
+            if (!personal) {
+                showToast('Campo Requerido', 'Ingresa el nombre del personal.', 'error');
+                return;
+            }
+
+            const id = document.getElementById('formId').value;
+            const mes = document.getElementById('formMes').value;
+            const valorHora = parseFloat(document.getElementById('formValorHora').value) || 0;
+            const horasSemanales = parseFloat(document.getElementById('formHorasSemanales').value) || 0;
+            const antiguedad = parseInt(document.getElementById('formAntiguedad').value) || 0;
+            const excluirAntiguedad = document.getElementById('formAntiguedadSiNo').checked;
+            
+            const valorAntiguedad = parseFloat(document.getElementById('formValorAntiguedad').value) || 0;
+            const viajesColectivos = parseFloat(document.getElementById('formViajesColectivos').value) || 0;
+            const deposito = parseFloat(document.getElementById('formDeposito').value) || 0;
+            const diasLicencia = parseInt(document.getElementById('formDiasLicencia').value) || 0;
+            const licenciaGozada = parseInt(document.getElementById('formLicenciaGozada').value) || 0;
+            const licenciaRestante = parseInt(document.getElementById('formLicenciaRestante').value) || 0;
+            const fechasGozadas = document.getElementById('formFechasGozadas').value.trim();
+            const pagoMensual = parseFloat(document.getElementById('formPagoMensual').value) || 0;
+
+            const isNew = !id;
+            const targetId = isNew ? generateShortId() : id;
+
+            const rowData = {
+                "ID": targetId,
+                "Personal": personal,
+                "Mes": mes,
+                "Valor hora": valorHora,
+                "Horas_semanales": horasSemanales,
+                "Antigüedad": antiguedad,
+                "Antiguedad_si_no": excluirAntiguedad,
+                "valor_antiguedad": valorAntiguedad,
+                "Viajes_Colectivos": viajesColectivos,
+                "Deposito": deposito,
+                "Dias_licencia_anuales": diasLicencia,
+                "Licencia_gozada": licenciaGozada,
+                "Licencia_restante": licenciaRestante,
+                "Fechas_gozadas": fechasGozadas,
+                "Pago_Mensual": pagoMensual
+            };
+
+            setProcessing(true, 'Guardando registro...');
+
+            // Guardar localmente (como único registro)
+            cleaningData = [rowData];
+            
+            renderTable();
+
+            // Sincronizar con el backend
+            try {
+                // En un escenario real, mandaríamos el registro completo al backend
+                // Para simplificar y dado que Apps Script de Sheets se maneja por celdas individuales en updateCell,
+                // vamos a guardar la base local completa en localStorage y si está disponible la API,
+                // podemos emular un envío masivo o guardar localmente.
+                localStorage.setItem('demo_limpieza_data', JSON.stringify(cleaningData));
+                
+                // Intentamos mandar la fila completa por POST a Apps Script si soporta guardar filas
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Evitar problemas de CORS de redirección de Apps Script
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'saveCleaningRow',
+                        sheetName: 'BD AS_LIMPIEZA',
+                        rowData: rowData
+                    })
+                });
+                
+                showToast('Guardado', 'El registro se guardó de forma permanente.', 'success');
+            } catch (error) {
+                console.error("Error guardando en Apps Script:", error);
+                showToast('Guardado Local', 'Se guardó en la base local del navegador (Offline).', 'info');
+            } finally {
+                setProcessing(false);
+            }
+        }
+
+        // Diálogo de Confirmación para Borrar
+        async function confirmDeleteRow(id) {
+            const record = cleaningData.find(r => r.ID === id);
+            if (!record) return;
+
+            const confirmed = await showCustomConfirm(
+                'Borrar registro',
+                `¿Estás seguro de que deseas eliminar la liquidación de ${record.Personal} para el mes de ${record.Mes}?`,
+                true
+            );
+            if (!confirmed) return;
+
+            setProcessing(true, 'Eliminando...');
+
+            // Eliminar localmente
+            cleaningData = cleaningData.filter(r => r.ID !== id);
+            localStorage.setItem('demo_limpieza_data', JSON.stringify(cleaningData));
+            renderTable();
+
+            // Sincronizar borrado con Sheets
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'deleteCleaningRow',
+                        sheetName: 'BD AS_LIMPIEZA',
+                        id: id
+                    })
+                });
+                showToast('Eliminado', 'El registro se eliminó del sistema.', 'success');
+            } catch (error) {
+                console.error("Error al borrar en Sheets:", error);
+                showToast('Borrado Local', 'Se eliminó de la base local (Offline).', 'info');
+            } finally {
+                setProcessing(false);
+            }
+        }
+
+        // ====================================================
+        // UTILS & CONFIRMATION BOX MODAL
+        // ====================================================
+        function generateShortId() {
+            return Math.random().toString(36).substring(2, 10);
+        }
+
+        function setProcessing(show, text = 'Procesando...') {
+            const indicator = document.getElementById('procIndicator');
+            const procText = document.getElementById('procText');
+            if (show) {
+                procText.textContent = text;
+                indicator.style.display = 'flex';
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' 
+                ? '<i class="fa-solid fa-circle-check toast-icon"></i>' 
+                : (type === 'error' ? '<i class="fa-solid fa-circle-exclamation toast-icon"></i>' : '<i class="fa-solid fa-circle-info toast-icon"></i>');
+
+            toast.innerHTML = `
+                ${icon}
+                <div class="toast-content">
+                    <h4>${title}</h4>
+                    <p>${message}</p>
+                </div>
+            `;
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function showCustomConfirm(title, message, isDanger = true) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                const titleEl = document.getElementById('confirmTitle');
+                const textEl = document.getElementById('confirmText');
+                const iconEl = document.getElementById('confirmIcon');
+                
+                titleEl.textContent = title;
+                textEl.textContent = message;
+                
+                if (isDanger) {
+                    iconEl.className = 'confirm-icon confirm-danger';
+                    iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                } else {
+                    iconEl.className = 'confirm-icon confirm-info';
+                    iconEl.innerHTML = '<i class="fa-solid fa-circle-question"></i>';
+                }
+
+                modal.classList.add('show');
+
+                const btnCancel = document.getElementById('btnConfirmCancel');
+                const btnOk = document.getElementById('btnConfirmOk');
+
+                const cleanup = () => {
+                    modal.classList.remove('show');
+                    btnCancel.onclick = null;
+                    btnOk.onclick = null;
+                };
+
+                btnCancel.onclick = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                btnOk.onclick = () => {
+                    cleanup();
+                    resolve(true);
+                };
+            });
+        }
+        
+        // Enviar por Email
+        function sendEmail() {
+            const personal = document.getElementById('formPersonal').value || 'Personal';
+            const mes = document.getElementById('formMes').value || '';
+            const valorHora = parseFloat(document.getElementById('formValorHora').value) || 0;
+            const horasSemanales = parseFloat(document.getElementById('formHorasSemanales').value) || 0;
+            const viajes = parseFloat(document.getElementById('formViajesColectivos').value) || 0;
+            const deposito = parseFloat(document.getElementById('formDeposito').value) || 0;
+            const antiguedad = parseFloat(document.getElementById('formValorAntiguedad').value) || 0;
+            const excluirAntiguedad = document.getElementById('formAntiguedadSiNo').checked;
+            
+            const email = 'sebadipy@hotmail.com';
+            const subject = `Liquidación Semanal - ${personal} - ${mes}`;
+            
+            let body = `Hola,\n\nTe envío el detalle de la liquidación semanal para ${personal}:\n\n`;
+            body += `- Valor Hora: $${valorHora.toLocaleString('es-AR')}\n`;
+            body += `- Horas Semanales: ${horasSemanales} hrs\n`;
+            if (viajes > 0) body += `- Viajes Colectivos: $${viajes.toLocaleString('es-AR')}\n`;
+            if (!excluirAntiguedad && antiguedad > 0) body += `- Antigüedad (pago mensual único): $${antiguedad.toLocaleString('es-AR')}\n`;
+            body += `-----------------------------------\n`;
+            body += `Total a depositar en la semana: $${deposito.toLocaleString('es-AR')}\n\n`;
+            body += `Saludos.`;
+
+            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.open(mailtoLink, '_blank');
+        }
+
+        // Modal de Confirmación Genérico
+        function showConfirmModal(title, message, isDanger = false, onConfirm) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customConfirmModal');
+                const titleEl = document.getElementById('confirmTitle');
+                const msgEl = document.getElementById('confirmMessage');
+                const iconEl = document.getElementById('confirmIcon');
+                const acceptBtn = document.getElementById('btnConfirmAccept');
+                const cancelBtn = document.getElementById('btnConfirmCancel');
+
+                titleEl.textContent = title;
+                msgEl.textContent = message;
+
+                if (isDanger) {
+                    iconEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                    iconEl.className = 'confirm-icon confirm-danger';
+                    acceptBtn.style.background = '#ef4444';
+                    acceptBtn.innerHTML = '<i class="fa-solid fa-trash"></i> Eliminar';
+                } else {
+                    iconEl.innerHTML = '<i class="fa-solid fa-circle-question"></i>';
+                    iconEl.className = 'confirm-icon confirm-info';
+                    acceptBtn.style.background = '#0d9488';
+                    acceptBtn.innerHTML = '<i class="fa-solid fa-check"></i> Aceptar';
+                }
+
+                modal.classList.add('show');
+
+                const onAccept = () => {
+                    cleanup();
+                    resolve(true);
+                };
+
+                const onCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                const cleanup = () => {
+                    modal.classList.remove('show');
+                    acceptBtn.removeEventListener('click', onAccept);
+                    cancelBtn.removeEventListener('click', onCancel);
+                };
+
+                acceptBtn.addEventListener('click', onAccept);
+                cancelBtn.addEventListener('click', onCancel);
+            });
+        }
+    </script>
+</body>
+</html>
