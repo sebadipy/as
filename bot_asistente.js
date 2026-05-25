@@ -450,6 +450,11 @@ class BotAsistente {
                 cursor: not-allowed;
             }
 
+            /* Ensure header actions are visible when chat is opened on any small screen */
+            .bot-window.show .mobile-header-actions {
+                display: flex !important;
+            }
+
             /* ===== ÁREA DE MENSAJES (wallpaper) ===== */
             .bot-messages {
                 flex: 1;
@@ -665,9 +670,6 @@ class BotAsistente {
             <div class="bot-bubble-group">
                 <div class="bot-bubble-trigger" id="botTrigger" onclick="window.botInstance.toggleWindow()">
                     <i class="fa-brands fa-whatsapp"></i>
-                </div>
-                <div class="bot-quick-actions" id="botQuickActions">
-                    <button type="button" title="Pagos" onclick="window.location.href='pagos.html'"><i class="fa-solid fa-file-invoice-dollar"></i></button>
                 </div>
             </div>
             <div class="bot-window" id="botWindow">
