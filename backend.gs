@@ -6,7 +6,7 @@
 
 function doGet(e) {
   const action = e.parameter.action;
-  const sheetName = "BD ASISTENTE";
+  const sheetName = e.parameter.sheetName || "BD ASISTENTE";
   const doc = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = doc.getSheetByName(sheetName);
   
@@ -115,7 +115,7 @@ function doPost(e) {
   }
   
   const action = requestData.action;
-  const sheetName = "BD ASISTENTE";
+  const sheetName = requestData.sheetName || "BD ASISTENTE";
   const doc = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = doc.getSheetByName(sheetName);
   
