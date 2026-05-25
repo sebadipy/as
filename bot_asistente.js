@@ -409,9 +409,16 @@ class BotAsistente {
             .mobile-header-actions button {
                 background: none;
                 border: none;
-                color: rgba(255,255,255,0.5); /* Disabled state */
+                color: rgba(255,255,255,0.85);
                 font-size: 1.2rem;
                 padding: 0;
+                cursor: pointer;
+            }
+            .mobile-header-actions button:hover {
+                color: white;
+            }
+            .mobile-header-actions button:disabled {
+                color: rgba(255,255,255,0.4);
                 cursor: not-allowed;
             }
 
@@ -641,7 +648,7 @@ class BotAsistente {
                     </div>
                     <div class="mobile-header-actions" style="display: ${isMobile ? 'flex' : 'none'} !important;">
                         <button disabled title="Alquileres (Próximamente)"><i class="fa-solid fa-house-user"></i></button>
-                        <button disabled title="Limpieza (Próximamente)"><i class="fa-solid fa-broom"></i></button>
+                        <button type="button" title="Abrir Limpieza" onclick="window.location.href='limpieza.html'"><i class="fa-solid fa-broom"></i></button>
                     </div>
                     <button class="bot-close" onclick="window.botInstance.closeAndClearChat()"><i class="fa-solid fa-xmark"></i></button>
                 </div>
