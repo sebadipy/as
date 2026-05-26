@@ -849,6 +849,14 @@
             color: #cbd5e1;
         }
 
+        .btn-submit-action:disabled {
+            background: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
         /* Media Query para la Versión Móvil */
         @media (max-width: 768px) {
             header {
@@ -1070,7 +1078,7 @@
                 <!-- Ubicación -->
                 <div class="form-group">
                     <label for="formUbicacion">Ubicación:*</label>
-                    <select id="formUbicacion" onchange="suggestDetails()" required>
+                    <select id="formUbicacion" onchange="suggestDetails(); validateForm();" required>
                         <option value="a53d229d">Departamento Colón 2154 6to.39</option>
                         <option value="6499497b">Departamento Moreno 2586 8D</option>
                         <option value="91d8ca59">Cochera Nro 2 Moreno 2554</option>
@@ -1081,13 +1089,13 @@
                 <!-- Año -->
                 <div class="form-group">
                     <label for="formAnio">Año:*</label>
-                    <input type="number" id="formAnio" placeholder="Ej: 2026" required>
+                    <input type="number" id="formAnio" placeholder="Ej: 2026" oninput="validateForm()" onchange="validateForm()" required>
                 </div>
 
                 <!-- Mes -->
                 <div class="form-group">
                     <label for="formMes">Mes:*</label>
-                    <select id="formMes" required>
+                    <select id="formMes" onchange="validateForm()" required>
                         <option value="ENERO">ENERO</option>
                         <option value="FEBRERO">FEBRERO</option>
                         <option value="MARZO">MARZO</option>
@@ -1106,13 +1114,13 @@
                 <!-- Fecha de pago -->
                 <div class="form-group">
                     <label for="formFechaPago">Fecha de pago:*</label>
-                    <input type="date" id="formFechaPago" required>
+                    <input type="date" id="formFechaPago" oninput="validateForm()" onchange="validateForm()" required>
                 </div>
 
                 <!-- Entidad bancaria -->
                 <div class="form-group">
                     <label for="formBanco">Entidad bancaria:*</label>
-                    <select id="formBanco" required>
+                    <select id="formBanco" onchange="handleBancoChange()" required>
                         <option value="Bco.Galicia" selected>Bco.Galicia</option>
                         <option value="Bco.Provincia">Bco.Provincia</option>
                         <option value="Bco.Francés">Bco.Francés</option>
@@ -1126,7 +1134,7 @@
                 <!-- Transacción Bancaria Nro -->
                 <div class="form-group">
                     <label for="formTransaccion">Transacción Bancaria Nro:*</label>
-                    <input type="text" id="formTransaccion" placeholder="Ej: 0" required>
+                    <input type="text" id="formTransaccion" placeholder="Ej: 0" oninput="validateForm()" onchange="validateForm()" required>
                 </div>
 
                 <!-- Monto -->
@@ -1134,7 +1142,7 @@
                     <label for="formMonto">Monto: $*</label>
                     <div class="monto-input-group">
                         <button type="button" class="btn-monto-adjust" onclick="adjustMonto(-1000)">-</button>
-                        <input type="number" step="0.01" id="formMonto" value="0.00" oninput="updateConceptText()"
+                        <input type="number" step="0.01" id="formMonto" value="0.00" oninput="updateConceptText(); validateForm();" onchange="validateForm()"
                             required>
                         <button type="button" class="btn-monto-adjust" onclick="adjustMonto(1000)">+</button>
                     </div>
@@ -1144,15 +1152,15 @@
                 <!-- Concepto -->
                 <div class="form-group">
                     <label for="formConcepto">Concepto:*</label>
-                    <textarea id="formConcepto" rows="3" required></textarea>
+                    <textarea id="formConcepto" rows="3" oninput="validateForm()" onchange="validateForm()" required></textarea>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-modal-cancel" onclick="closeCobrarModal()">Cancelar</button>
-                <button class="btn-submit-action" onclick="submitCobrarForm()">
+                <button id="btnSubmitCobrar" class="btn-submit-action" onclick="submitCobrarForm()" disabled>
                     <i class="fa-solid fa-envelope-open-text"></i> Guardar y Enviar Recibo
                 </button>
-            </div>
+            </div>            </div>
         </div>
     </div>
 
@@ -1393,6 +1401,47 @@
             });
         }
 
+        // Validar que todos los campos obligatorios estén cargados
+        function validateForm() {
+            const anioInput = document.getElementById("formAnio");
+            const fechaInput = document.getElementById("formFechaPago");
+            const transaccionInput = document.getElementById("formTransaccion");
+            const montoInput = document.getElementById("formMonto");
+            const conceptoInput = document.getElementById("formConcepto");
+
+            const anio = anioInput ? anioInput.value.trim() : "";
+            const fecha = fechaInput ? fechaInput.value.trim() : "";
+            const transaccion = transaccionInput ? transaccionInput.value.trim() : "";
+            const monto = montoInput ? parseFloat(montoInput.value) || 0 : 0;
+            const concepto = conceptoInput ? conceptoInput.value.trim() : "";
+
+            const isValid = anio && fecha && transaccion && (monto > 0) && concepto;
+            
+            const btn = document.getElementById("btnSubmitCobrar");
+            if (btn) {
+                btn.disabled = !isValid;
+            }
+        }
+
+        // Manejar cambio de banco para autocompletar transacción si es Efectivo
+        function handleBancoChange() {
+            const bancoSelect = document.getElementById("formBanco");
+            const transaccionInput = document.getElementById("formTransaccion");
+            if (bancoSelect && transaccionInput) {
+                const banco = bancoSelect.value;
+                if (banco === "Efectivo") {
+                    if (transaccionInput.value.trim() === "" || transaccionInput.value.trim() === "0") {
+                        transaccionInput.value = "Efectivo";
+                    }
+                } else {
+                    if (transaccionInput.value.trim() === "Efectivo" || transaccionInput.value.trim() === "0") {
+                        transaccionInput.value = "";
+                    }
+                }
+            }
+            validateForm();
+        }
+
         // Abrir Modal
         function openCobrarModal(id = "") {
             const modal = document.getElementById("cobrarModal");
@@ -1422,12 +1471,13 @@
                 document.getElementById("formMes").value = _meses[_now.getMonth()];
                 document.getElementById("formFechaPago").value = _now.toISOString().split("T")[0];
                 document.getElementById("formBanco").value = "Bco.Galicia";
-                document.getElementById("formTransaccion").value = "0";
+                document.getElementById("formTransaccion").value = "";
 
                 // Sugerir monto del último cobro
                 suggestDetails();
             }
 
+            validateForm();
             modal.classList.add("show");
         }
 
@@ -1459,6 +1509,7 @@
             document.getElementById("formMonto").value = suggestedMonto;
 
             updateConceptText();
+            validateForm();
         }
 
         function getMonthNumber(monthName) {
@@ -1497,6 +1548,7 @@
             curr = Math.max(0, curr + val);
             input.value = curr.toFixed(2);
             updateConceptText();
+            validateForm();
         }
 
         // Guardar Cobro
