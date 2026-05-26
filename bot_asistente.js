@@ -333,10 +333,10 @@ class BotAsistente {
             }
 
             @media (max-width: 768px) {
-                header, .container {
+                body.bot-active header, body.bot-active .container {
                     display: none !important;
                 }
-                .bot-widget {
+                body.bot-active .bot-widget {
                     position: fixed !important;
                     top: 0 !important;
                     left: 0 !important;
@@ -349,10 +349,24 @@ class BotAsistente {
                     padding: 0 !important;
                     z-index: 9999 !important;
                 }
-                .bot-bubble-trigger {
+                body:not(.bot-active) .bot-widget {
+                    position: fixed;
+                    bottom: 25px;
+                    right: 25px;
+                    z-index: 9998;
+                    width: auto;
+                    height: auto;
+                }
+                body.bot-active .bot-bubble-trigger {
                     display: none !important;
                 }
+                body:not(.bot-active) .bot-bubble-trigger {
+                    display: flex !important;
+                }
                 .bot-window {
+                    display: none;
+                }
+                .bot-window.show {
                     position: fixed !important;
                     top: 0 !important;
                     left: 0 !important;
@@ -369,7 +383,7 @@ class BotAsistente {
                     display: flex !important;
                 }
                 .bot-close {
-                    display: none !important;
+                    display: block !important;
                 }
                 .mobile-header-actions {
                     display: flex !important;
@@ -684,8 +698,8 @@ class BotAsistente {
                         <span>En línea</span>
                     </div>
                     <div class="mobile-header-actions">
-                        <button disabled title="Alquileres (Próximamente)"><i class="fa-solid fa-house-user"></i></button>
-                        <button type="button" title="Abrir Pagos" onclick="event.stopPropagation(); if(window.location.pathname.includes('pagos.html')) { window.botInstance.closeAndClearChat(); } else { window.location.href='pagos.html'; }"><i class="fa-solid fa-file-invoice-dollar"></i></button>
+                        <button type="button" title="Abrir Alquileres" onclick="event.stopPropagation(); if(window.location.pathname.includes('alquiler.html')) { window.botInstance.closeAndClearChat(); } else { window.location.href='alquiler.html'; }"><i class="fa-solid fa-house-user"></i></button>
+                        <button type="button" title="Abrir Pagos" onclick="window.botInstance.confirmarAccesoPagos(event)"><i class="fa-solid fa-file-invoice-dollar"></i></button>
                         <button type="button" title="Abrir Limpieza" onclick="event.stopPropagation(); if(window.location.pathname.includes('limpieza.html')) { window.botInstance.closeAndClearChat(); } else { window.location.href='limpieza.html'; }"><i class="fa-solid fa-broom"></i></button>
                     </div>
                     <button class="bot-close" onclick="window.botInstance.closeAndClearChat()"><i class="fa-solid fa-xmark"></i></button>
@@ -710,6 +724,14 @@ class BotAsistente {
         setTimeout(() => {
             this.sendWelcomeMessage();
         }, 100);
+
+        if (isMobile) {
+            document.body.classList.add('bot-active');
+            setTimeout(() => {
+                const win = document.getElementById('botWindow');
+                if (win) win.classList.add('show');
+            }, 150);
+        }
     }
 
     sendWelcomeMessage() {
@@ -730,8 +752,11 @@ class BotAsistente {
         const win = document.getElementById('botWindow');
         win.classList.toggle('show');
         if (win.classList.contains('show')) {
+            document.body.classList.add('bot-active');
             document.getElementById('botInput').focus();
             this.scrollToBottom();
+        } else {
+            document.body.classList.remove('bot-active');
         }
     }
 
@@ -741,6 +766,7 @@ class BotAsistente {
         if (win) {
             win.classList.remove('show');
         }
+        document.body.classList.remove('bot-active');
 
         // 2. Limpiar el input
         const input = document.getElementById('botInput');
@@ -753,6 +779,14 @@ class BotAsistente {
 
         // 4. Reiniciar los mensajes al estado inicial de bienvenida
         this.sendWelcomeMessage();
+    }
+
+    confirmarAccesoPagos(event) {
+        if (event) event.stopPropagation();
+        if (confirm("¿Desea acceder a la vista de pagos?")) {
+            this.closeAndClearChat();
+            window.location.href = 'pagos.html';
+        }
     }
 
     sendPreset(text) {

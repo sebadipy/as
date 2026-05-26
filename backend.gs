@@ -4,6 +4,17 @@
  * Copia y pega este código en tu editor de extensiones de Apps Script en Google Sheets.
  */
 
+/**
+ * ⚠️ EJECUTAR ESTA FUNCIÓN UNA VEZ DESDE EL EDITOR PARA AUTORIZAR GMAIL
+ * Menú Apps Script → seleccioná "authorizeGmail" → clic en ▶ Ejecutar
+ * Se abrirá la pantalla de permisos → Aceptar
+ * Después de eso el Web App podrá enviar emails con adjuntos.
+ */
+function authorizeGmail() {
+  GmailApp.getAliases(); // Fuerza el pedido de permisos de Gmail
+  Logger.log("✅ Gmail autorizado correctamente.");
+}
+
 function doGet(e) {
   // Si se pide una página HTML, servirla
   const page = (e && e.parameter && e.parameter.page) ? e.parameter.page : '';
@@ -256,6 +267,154 @@ function doPost(e) {
     })).setMimeType(ContentService.MimeType.JSON);
   }
   
+  if (action === 'saveAlquilerRow') {
+    const rowData = requestData.rowData;
+    if (!rowData) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: 'No se enviaron datos (rowData)'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    const headers = values[0];
+    
+    let targetRowIdx = -1;
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][0].toString().trim() === rowData.ID.toString().trim()) {
+        targetRowIdx = i + 1; // 1-indexed
+        break;
+      }
+    }
+    
+    function normalize(s) {
+      if (!s) return "";
+      return String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    }
+    
+    const newRowValues = [];
+    const isNew = (targetRowIdx === -1);
+    const rowNum = isNew ? values.length + 1 : targetRowIdx;
+    
+    for (let j = 0; j < headers.length; j++) {
+      const headerNorm = normalize(headers[j]);
+      let val = "";
+      
+      if (j === 0) {
+        val = rowData.ID;
+      } else if (headerNorm.includes("ubicacion")) {
+        val = rowData.Ubicacion;
+      } else if (headerNorm.includes("mes")) {
+        val = rowData.Mes;
+      } else if (headerNorm.includes("anio") || headerNorm.includes("año")) {
+        val = rowData.Anio;
+      } else if (headerNorm.includes("monto") && !headerNorm.includes("letras")) {
+        val = rowData.Monto;
+      } else if (headerNorm.includes("recibo")) {
+        val = rowData.Recibo;
+      } else if (headerNorm.includes("fecha")) {
+        val = rowData.FechaPago;
+      } else if (headerNorm.includes("concepto")) {
+        val = rowData.Concepto;
+      } else if (j === 8) { // Columna I: Formula de Monto en Letras
+        val = '=CONCAT(MAYUSC(NUMBERTEXT(E' + rowNum + ',"es"))," PESOS")';
+      } else {
+        for (const key in rowData) {
+          if (normalize(key) === headerNorm) {
+            val = rowData[key];
+            break;
+          }
+        }
+      }
+      newRowValues.push(val);
+    }
+    
+    if (isNew) {
+      sheet.appendRow(newRowValues);
+    } else {
+      sheet.getRange(targetRowIdx, 1, 1, headers.length).setValues([newRowValues]);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'success',
+      message: 'Cobro de alquiler guardado con éxito en fila ' + rowNum
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  if (action === 'deleteAlquilerRow') {
+    const id = requestData.id;
+    if (!id) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: 'No se envió ID para borrar'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    
+    let targetRowIdx = -1;
+    for (let i = 1; i < values.length; i++) {
+      if (values[i][0].toString().trim() === id.toString().trim()) {
+        targetRowIdx = i + 1; // 1-indexed
+        break;
+      }
+    }
+    
+    if (targetRowIdx !== -1) {
+      sheet.deleteRow(targetRowIdx);
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'success',
+        message: 'Cobro de alquiler eliminado de fila ' + targetRowIdx
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'error',
+      message: 'No se encontró el registro con ID ' + id
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  if (action === 'sendAlquilerEmail') {
+    const to        = requestData.to       || 'sebadipy@hotmail.com';
+    const subject   = requestData.subject  || 'Recibo de Alquiler';
+    const body      = requestData.body     || '';
+    const pdfBase64 = requestData.pdfBase64;
+    const filename  = requestData.filename || 'Recibo.pdf';
+
+    if (!pdfBase64) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: 'No se recibió el PDF en base64'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    try {
+      const pdfBlob = Utilities.newBlob(
+        Utilities.base64Decode(pdfBase64),
+        'application/pdf',
+        filename
+      );
+
+      GmailApp.sendEmail(to, subject, body, {
+        attachments: [pdfBlob],
+        name: 'Asistente de Alquileres'
+      });
+
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'success',
+        message: 'Email enviado con PDF adjunto a ' + to
+      })).setMimeType(ContentService.MimeType.JSON);
+
+    } catch (err) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error',
+        message: 'Error al enviar email: ' + err.toString()
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
   return ContentService.createTextOutput(JSON.stringify({
     status: 'error',
     message: 'Acción POST no válida'

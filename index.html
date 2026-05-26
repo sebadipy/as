@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tablero Inteligente - Inicio</title>
     <!-- Google Fonts: Inter & Outfit -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <!-- FontAwesome for Premium Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
+
     <style>
         :root {
             --primary: #4f46e5;
@@ -88,8 +91,13 @@
         }
 
         @keyframes pulseIcon {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(1.05);
+            }
         }
 
         .header-title-group h1 {
@@ -115,7 +123,7 @@
             gap: 2rem;
             flex: 1;
         }
-        
+
         .section-title {
             font-family: 'Outfit', sans-serif;
             font-size: 1.4rem;
@@ -220,32 +228,32 @@
             text-transform: uppercase;
             border: 1px solid #fcd34d;
         }
-        
+
         .dash-card.disabled {
             opacity: 0.7;
             border-style: dashed;
             cursor: not-allowed;
             text-decoration: none;
         }
-        
+
         .dash-card.disabled:hover {
             transform: none;
             border-color: var(--border);
             box-shadow: var(--shadow);
         }
-        
+
         .dash-card.disabled:hover .dash-icon {
             background: rgba(79, 70, 229, 0.1);
             color: var(--primary);
             transform: none;
         }
-        
+
         .dash-card.disabled::before {
             display: none;
         }
-
     </style>
 </head>
+
 <body>
 
     <header>
@@ -261,11 +269,11 @@
     </header>
 
     <div class="container">
-        
+
         <div class="section-title">Módulos Disponibles</div>
-        
+
         <div class="dashboard-grid">
-            
+
             <!-- 1. Pagos -->
             <a href="pagos.html" class="dash-card">
                 <div class="dash-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
@@ -274,12 +282,11 @@
             </a>
 
             <!-- 2. Alquileres -->
-            <div class="dash-card disabled">
-                <div class="badge-soon">Próximamente</div>
+            <a href="alquiler.html" class="dash-card">
                 <div class="dash-icon"><i class="fa-solid fa-house-user"></i></div>
                 <div class="dash-title">Alquileres</div>
                 <div class="dash-desc">Administración de propiedades, inquilinos y cobros mensuales.</div>
-            </div>
+            </a>
 
             <!-- 3. Limpieza -->
             <a href="limpieza.html" class="dash-card">
@@ -287,7 +294,7 @@
                 <div class="dash-title">Limpieza</div>
                 <div class="dash-desc">Control de gastos de mantenimiento, productos y personal.</div>
             </a>
-            
+
             <!-- 4. Promociones -->
             <div class="dash-card disabled">
                 <div class="badge-soon">Próximamente</div>
@@ -295,7 +302,7 @@
                 <div class="dash-title">Promociones</div>
                 <div class="dash-desc">Gestión de descuentos, cupones y ofertas especiales.</div>
             </div>
-            
+
             <!-- 5. Vencimientos -->
             <div class="dash-card disabled">
                 <div class="badge-soon">Próximamente</div>
@@ -303,7 +310,7 @@
                 <div class="dash-title">Vencimientos</div>
                 <div class="dash-desc">Calendario de alertas, pólizas y pagos próximos a vencer.</div>
             </div>
-            
+
             <!-- 6. Configuración -->
             <div class="dash-card disabled">
                 <div class="badge-soon">Próximamente</div>
@@ -316,4 +323,5 @@
     </div>
 
 </body>
+
 </html>
