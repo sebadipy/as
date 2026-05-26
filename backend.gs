@@ -300,31 +300,41 @@ function doPost(e) {
     for (let j = 0; j < headers.length; j++) {
       const headerNorm = normalize(headers[j]);
       let val = "";
+      let found = false;
       
-      if (j === 0) {
-        val = rowData.ID;
-      } else if (headerNorm.includes("ubicacion")) {
-        val = rowData.Ubicacion;
-      } else if (headerNorm.includes("mes")) {
-        val = rowData.Mes;
-      } else if (headerNorm.includes("anio") || headerNorm.includes("año")) {
-        val = rowData.Anio;
-      } else if (headerNorm.includes("monto") && !headerNorm.includes("letras")) {
-        val = rowData.Monto;
-      } else if (headerNorm.includes("recibo")) {
-        val = rowData.Recibo;
-      } else if (headerNorm.includes("fecha")) {
-        val = rowData.FechaPago;
-      } else if (headerNorm.includes("concepto")) {
-        val = rowData.Concepto;
-      } else if (j === 8) { // Columna I: Formula de Monto en Letras
-        val = '=CONCAT(MAYUSC(NUMBERTEXT(E' + rowNum + ',"es"))," PESOS")';
-      } else {
-        for (const key in rowData) {
-          if (normalize(key) === headerNorm) {
-            val = rowData[key];
-            break;
-          }
+      // Buscar coincidencia exacta o por alias normalizado en rowData
+      for (const key in rowData) {
+        if (normalize(key) === headerNorm) {
+          val = rowData[key];
+          found = true;
+          break;
+        }
+      }
+      
+      // Fallback para mapeo de alias comunes
+      if (!found) {
+        if (headerNorm.includes("id_alquiler") || headerNorm === "id") {
+          val = rowData.ID;
+        } else if (headerNorm.includes("ubicacion")) {
+          val = rowData.Ubicacion;
+        } else if (headerNorm.includes("mes")) {
+          val = rowData.Mes;
+        } else if (headerNorm.includes("anio") || headerNorm.includes("año")) {
+          val = rowData.Anio;
+        } else if (headerNorm === "monto") {
+          val = rowData.Monto;
+        } else if (headerNorm.includes("recibo")) {
+          val = rowData.Recibo;
+        } else if (headerNorm.includes("fecha")) {
+          val = rowData.FechaPago;
+        } else if (headerNorm.includes("concepto")) {
+          val = rowData.Concepto;
+        } else if (headerNorm.includes("transaccion")) {
+          val = rowData.Transaccion;
+        } else if (headerNorm.includes("banco")) {
+          val = rowData.Banco;
+        } else if (headerNorm.includes("pesos") || headerNorm.includes("letras")) {
+          val = '=CONCAT(MAYUSC(NUMBERTEXT(E' + rowNum + ',"es"))," PESOS")';
         }
       }
       newRowValues.push(val);

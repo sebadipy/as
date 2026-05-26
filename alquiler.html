@@ -426,8 +426,8 @@
             border-radius: 20px;
             width: 90%;
             max-width: 550px;
-            max-height: 90vh;
-            overflow-y: auto;
+            max-height: 85vh;
+            overflow: hidden;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             border: 1px solid var(--border);
             display: flex;
@@ -473,6 +473,8 @@
             display: flex;
             flex-direction: column;
             gap: 1.25rem;
+            overflow-y: auto;
+            flex: 1;
         }
 
         .form-group {
@@ -978,7 +980,7 @@
 
             .modal-content {
                 width: 95%;
-                max-height: 95vh;
+                max-height: 80vh;
             }
 
             .modal-header, .modal-body, .modal-footer {
@@ -1541,7 +1543,8 @@
                 "Recibo": nroRecibo,
                 "FechaPago": fecha,
                 "Banco": banco,
-                "Transaccion": transaccion
+                "Transaccion": transaccion,
+                "Anio": anio
             };
 
             if (isNew) {
