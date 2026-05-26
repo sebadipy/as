@@ -1253,7 +1253,7 @@
                 const response = await fetch(url);
                 const res = await response.json();
 
-                if (res.status === 'success' && res.data && res.data.length > 0) {
+                if (res.status === 'success' && res.data) {
                     alquileresData = res.data.map(row => parseBackendRow(row));
                     showToast('Sincronizado', 'Se cargaron los cobros desde la nube.', 'success');
                 } else {
