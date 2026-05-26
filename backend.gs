@@ -333,8 +333,6 @@ function doPost(e) {
           val = rowData.Transaccion;
         } else if (headerNorm.includes("banco")) {
           val = rowData.Banco;
-        } else if (headerNorm.includes("pesos") || headerNorm.includes("letras")) {
-          val = '=CONCAT(MAYUSC(NUMBERTEXT(E' + rowNum + ',"es"))," PESOS")';
         }
       }
       newRowValues.push(val);

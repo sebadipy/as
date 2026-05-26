@@ -1220,8 +1220,8 @@
         async function loadAlquileresData() {
             setProcessing(true, "Cargando cobros...");
             try {
-                // Sincronizar con hoja "BS AS_ALQUILER"
-                const url = `${API_URL}?action=read&sheetName=BS%20AS_ALQUILER&_t=${Date.now()}`;
+                // Sincronizar con hoja "BD AS_ALQUILER"
+                const url = `${API_URL}?action=read&sheetName=BD%20AS_ALQUILER&_t=${Date.now()}`;
                 const response = await fetch(url);
                 const res = await response.json();
 
@@ -1242,17 +1242,8 @@
         }
 
         function useOfflineFallback() {
-            const saved = localStorage.getItem("demo_alquileres_data");
-            if (saved && saved !== "undefined" && saved !== "null") {
-                try {
-                    alquileresData = JSON.parse(saved);
-                } catch (e) {
-                    alquileresData = [];
-                }
-            } else {
-                alquileresData = [];
-            }
-            showToast('Modo Demostración', 'Usando base de datos cacheada localmente.', 'info');
+            alquileresData = [];
+            showToast('Error de Conexión', 'No se pudieron cargar los datos desde la nube.', 'error');
         }
 
         // Búsqueda flexible de campos
@@ -1554,8 +1545,6 @@
                 if (idx !== -1) alquileresData[idx] = rowData;
             }
 
-            localStorage.setItem("demo_alquileres_data", JSON.stringify(alquileresData));
-
             // Sincronizar backend mediante POST
             try {
                 await fetch(API_URL, {
@@ -1564,7 +1553,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'saveAlquilerRow',
-                        sheetName: 'BS AS_ALQUILER',
+                        sheetName: 'BD AS_ALQUILER',
                         rowData: rowData
                     })
                 });
@@ -1599,7 +1588,6 @@
             if (confirm(`¿Estás seguro de eliminar el cobro del mes de ${rec.Mes} del año ${rec.Anio}?`)) {
                 setProcessing(true, "Eliminando cobro...");
                 alquileresData = alquileresData.filter(a => a.ID !== id);
-                localStorage.setItem("demo_alquileres_data", JSON.stringify(alquileresData));
 
                 // Enviar petición de borrado en segundo plano si aplica
                 try {
@@ -1609,7 +1597,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             action: 'deleteAlquilerRow',
-                            sheetName: 'BS AS_ALQUILER',
+                            sheetName: 'BD AS_ALQUILER',
                             id: id
                         })
                     });
