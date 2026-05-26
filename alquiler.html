@@ -816,6 +816,110 @@
             font-size: 3rem;
             color: #cbd5e1;
         }
+
+        /* Media Query para la Versión Móvil */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 1.25rem 1rem;
+                text-align: center;
+            }
+
+            .header-logo-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .btn-header, .btn-cobrar {
+                flex: 1;
+                justify-content: center;
+                font-size: 0.85rem;
+                padding: 10px 12px;
+            }
+
+            .container {
+                margin: 1rem auto;
+                gap: 1rem;
+                width: 92%;
+            }
+
+            .property-tabs {
+                padding-bottom: 8px;
+            }
+
+            .tab-btn {
+                padding: 10px 14px;
+                font-size: 0.85rem;
+            }
+
+            /* Responsive Table Card Layout */
+            #historyTable thead {
+                display: none;
+            }
+
+            #historyTable, #historyTable tbody, #historyTable tr, #historyTable td {
+                display: block;
+                width: 100%;
+            }
+
+            #historyTable tr {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                margin-bottom: 1rem;
+                padding: 10px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            }
+
+            #historyTable td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 8px;
+                border-bottom: 1px solid #f1f5f9;
+                text-align: right;
+            }
+
+            #historyTable td:last-child {
+                border-bottom: none;
+            }
+
+            #historyTable td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: var(--text-secondary);
+                text-transform: uppercase;
+                font-size: 0.72rem;
+                text-align: left;
+                margin-right: 10px;
+                letter-spacing: 0.5px;
+            }
+
+            .cell-month {
+                justify-content: flex-end;
+            }
+
+            .cell-actions {
+                justify-content: flex-end;
+                gap: 8px;
+            }
+
+            .modal-content {
+                width: 95%;
+                max-height: 95vh;
+            }
+
+            .modal-header, .modal-body, .modal-footer {
+                padding: 1rem;
+            }
+        }
     </style>
 </head>
 
@@ -1193,18 +1297,18 @@
                 }
 
                 tr.innerHTML = `
-                    <td class="cell-month"><i class="fa-solid fa-calendar-check"></i> ${rec.Mes}</td>
-                    <td>${rec.Anio}</td>
-                    <td class="cell-amount">$ ${rec.Monto.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td class="cell-actions">
+                    <td data-label="Mes" class="cell-month"><i class="fa-solid fa-calendar-check"></i> ${rec.Mes}</td>
+                    <td data-label="Año">${rec.Anio}</td>
+                    <td data-label="Monto" class="cell-amount">$ ${rec.Monto.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td data-label="Acciones" class="cell-actions">
                         <button class="btn-action edit" onclick="editRecord('${rec.ID}')" title="Editar cobro"><i class="fa-solid fa-pencil"></i></button>
                         <button class="btn-action delete" onclick="deleteRecord('${rec.ID}')" title="Eliminar cobro"><i class="fa-solid fa-trash-can"></i></button>
                         <button class="btn-action pdf" onclick="printReceipt('${rec.ID}', true)" title="Imprimir PDF y Enviar Mail"><i class="fa-solid fa-file-pdf"></i></button>
                     </td>
-                    <td>
+                    <td data-label="Nro. Recibo">
                         <span class="cell-receipt-badge"><i class="fa-solid fa-file-invoice"></i> ${rec.Recibo || '-'}</span>
                     </td>
-                    <td>${formattedFecha}</td>
+                    <td data-label="Fecha de Pago">${formattedFecha}</td>
                 `;
                 tbody.appendChild(tr);
             });
