@@ -171,55 +171,73 @@
             flex: 1;
         }
 
-        /* Selector de Propiedades por Pestañas */
+        /* Selector de Propiedades por Tarjetas */
         .property-tabs {
-            display: flex;
-            gap: 10px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 2px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-
-        .property-tabs::-webkit-scrollbar {
-            display: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            border-bottom: none;
+            padding-bottom: 4px;
+            overflow-x: visible;
         }
 
         .tab-btn {
-            background: none;
-            border: none;
-            padding: 12px 20px;
-            font-size: 0.95rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 14px 18px;
+            font-size: 0.92rem;
             font-weight: 600;
             color: var(--text-secondary);
             cursor: pointer;
-            position: relative;
-            transition: all 0.2s;
-            white-space: nowrap;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.25s ease;
+            white-space: normal;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            text-align: left;
+        }
+
+        .tab-btn i {
+            background: #f1f5f9;
+            color: var(--text-secondary);
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: all 0.25s ease;
         }
 
         .tab-btn:hover {
+            color: var(--primary);
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-btn:hover i {
+            background: #e0e7ff;
             color: var(--primary);
         }
 
         .tab-btn.active {
             color: var(--primary);
             font-weight: 700;
+            border: 2px solid var(--primary);
+            padding: 13px 17px;
+            box-shadow: 0 8px 16px -2px rgba(79, 70, 229, 0.12), 0 4px 6px -2px rgba(79, 70, 229, 0.08);
+            background-color: var(--surface);
         }
 
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 3px;
+        .tab-btn.active i {
             background: var(--primary);
-            border-top-left-radius: 3px;
-            border-top-right-radius: 3px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
         }
 
         /* History Table Card */
@@ -326,16 +344,18 @@
         }
 
         .btn-action {
-            width: 32px;
+            padding: 6px 12px;
             height: 32px;
             border-radius: 8px;
             border: none;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 6px;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.82rem;
+            font-weight: 600;
         }
 
         .btn-action.edit {
@@ -365,6 +385,16 @@
 
         .btn-action.pdf:hover {
             background: #0284c7;
+            color: white;
+        }
+
+        .btn-action.email {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .btn-action.email:hover {
+            background: var(--success);
             color: white;
         }
 
@@ -851,12 +881,36 @@
             }
 
             .property-tabs {
-                padding-bottom: 8px;
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 10px;
+                padding-bottom: 0;
             }
 
             .tab-btn {
-                padding: 10px 14px;
-                font-size: 0.85rem;
+                padding: 12px 8px;
+                font-size: 0.8rem;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                gap: 8px;
+                white-space: normal;
+                line-height: 1.25;
+                min-height: 96px;
+                width: 100%;
+                word-break: break-word;
+            }
+
+            .tab-btn.active {
+                padding: 11px 7px;
+            }
+
+            .tab-btn i {
+                width: 28px;
+                height: 28px;
+                min-width: 28px;
+                border-radius: 6px;
+                font-size: 0.95rem;
             }
 
             /* Responsive Table Card Layout */
@@ -909,6 +963,17 @@
             .cell-actions {
                 justify-content: flex-end;
                 gap: 8px;
+            }
+
+            .btn-action {
+                width: 32px;
+                height: 32px;
+                padding: 0;
+                justify-content: center;
+            }
+
+            .btn-action .btn-text {
+                display: none;
             }
 
             .modal-content {
@@ -1301,9 +1366,10 @@
                     <td data-label="Año">${rec.Anio}</td>
                     <td data-label="Monto" class="cell-amount">$ ${rec.Monto.toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     <td data-label="Acciones" class="cell-actions">
-                        <button class="btn-action edit" onclick="editRecord('${rec.ID}')" title="Editar cobro"><i class="fa-solid fa-pencil"></i></button>
-                        <button class="btn-action delete" onclick="deleteRecord('${rec.ID}')" title="Eliminar cobro"><i class="fa-solid fa-trash-can"></i></button>
-                        <button class="btn-action pdf" onclick="printReceipt('${rec.ID}', true)" title="Imprimir PDF y Enviar Mail"><i class="fa-solid fa-file-pdf"></i></button>
+                        <button class="btn-action edit" onclick="editRecord('${rec.ID}')" title="Editar cobro"><i class="fa-solid fa-pencil"></i> <span class="btn-text">Editar</span></button>
+                        <button class="btn-action delete" onclick="deleteRecord('${rec.ID}')" title="Eliminar cobro"><i class="fa-solid fa-trash-can"></i> <span class="btn-text">Borrar</span></button>
+                        <button class="btn-action pdf" onclick="printReceipt('${rec.ID}', false)" title="Descargar PDF"><i class="fa-solid fa-download"></i> <span class="btn-text">Imprimir</span></button>
+                        <button class="btn-action email" onclick="printReceipt('${rec.ID}', true)" title="Enviar Mail"><i class="fa-solid fa-envelope"></i> <span class="btn-text">Enviar</span></button>
                     </td>
                     <td data-label="Nro. Recibo">
                         <span class="cell-receipt-badge"><i class="fa-solid fa-file-invoice"></i> ${rec.Recibo || '-'}</span>
