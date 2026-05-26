@@ -963,13 +963,6 @@
                     <h3 id="kpiTotalHours">0 hrs</h3>
                 </div>
             </div>
-            <div class="kpi-card staff">
-                <div class="kpi-icon"><i class="fa-solid fa-user-tie"></i></div>
-                <div class="kpi-info">
-                    <p>Personal Liquidado</p>
-                    <h3 id="kpiStaffCount">0</h3>
-                </div>
-            </div>
         </div>
 
         <!-- Main Form Card -->
@@ -1278,7 +1271,10 @@
 
             document.getElementById('kpiTotalPayments').textContent = `$${totalPayments.toLocaleString('es-AR', { maximumFractionDigits: 0 })}`;
             document.getElementById('kpiTotalHours').textContent = `${totalHours} hrs`;
-            document.getElementById('kpiStaffCount').textContent = uniqueStaff.size;
+            const staffEl = document.getElementById('kpiStaffCount');
+            if (staffEl) {
+                staffEl.textContent = uniqueStaff.size;
+            }
         }
 
 
@@ -1565,7 +1561,9 @@
             if (viajes > 0) body += `- Viajes Colectivos: $${viajes.toLocaleString('es-AR')}\n`;
             if (!excluirAntiguedad && antiguedad > 0) body += `- Antigüedad (pago mensual único): $${antiguedad.toLocaleString('es-AR')}\n`;
             body += `-----------------------------------\n`;
-            body += `Total a depositar en la semana: $${deposito.toLocaleString('es-AR')}\n\n`;
+            
+            const totalDepositar = deposito + (!excluirAntiguedad ? antiguedad : 0);
+            body += `Total a depositar en la semana: $${totalDepositar.toLocaleString('es-AR')}\n\n`;
             body += `Saludos.`;
 
             const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;

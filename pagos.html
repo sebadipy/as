@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tablero Inteligente de Impuestos - BD Asistente</title>
     <!-- Google Fonts: Inter & Outfit -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <!-- FontAwesome for Premium Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="config.js"></script>
@@ -90,8 +93,13 @@
         }
 
         @keyframes pulseIcon {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.05); }
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(1.05);
+            }
         }
 
         .header-title-group h1 {
@@ -122,7 +130,7 @@
             transition: all 0.2s ease;
             cursor: pointer;
         }
-        
+
         .btn-back-home:hover {
             background: rgba(255, 255, 255, 0.25);
             transform: translateY(-2px);
@@ -204,14 +212,22 @@
             font-size: 1.3rem;
         }
 
-        .kpi-card.paid .kpi-icon { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-        .kpi-card.pending .kpi-icon { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
-        
+        .kpi-card.paid .kpi-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .kpi-card.pending .kpi-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
         /* Mayor gasto: parpadeo suave con borde difuminado rojo */
         .kpi-card.highest {
             border: 1px solid rgba(239, 68, 68, 0.4);
             animation: glow-pulse-red-card 2.5s infinite ease-in-out;
         }
+
         .kpi-card.highest .kpi-icon {
             background: rgba(239, 68, 68, 0.1);
             color: var(--danger);
@@ -222,10 +238,12 @@
                 box-shadow: var(--shadow);
                 border-color: rgba(239, 68, 68, 0.3);
             }
+
             50% {
                 box-shadow: 0 0 15px 4px rgba(239, 68, 68, 0.25);
                 border-color: rgba(239, 68, 68, 0.7);
             }
+
             100% {
                 box-shadow: var(--shadow);
                 border-color: rgba(239, 68, 68, 0.3);
@@ -290,7 +308,9 @@
             text-transform: uppercase;
         }
 
-        input[type="number"], select, input[type="text"] {
+        input[type="number"],
+        select,
+        input[type="text"] {
             width: 100%;
             padding: 10px 14px;
             border: 1px solid var(--border);
@@ -301,7 +321,8 @@
             transition: all 0.2s;
         }
 
-        input:focus, select:focus {
+        input:focus,
+        select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
         }
@@ -375,9 +396,20 @@
             font-weight: 600;
         }
 
-        .badge-month { background: #fee2e2; color: #b91c1c; }
-        .badge-tax { background: #e0f2fe; color: #0369a1; }
-        .badge-val { background: #d1fae5; color: #065f46; }
+        .badge-month {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .badge-tax {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .badge-val {
+            background: #d1fae5;
+            color: #065f46;
+        }
 
         .btn-apply-smart {
             background: var(--primary);
@@ -437,7 +469,8 @@
             font-size: 0.85rem;
         }
 
-        table.matrix-table th, table.matrix-table td {
+        table.matrix-table th,
+        table.matrix-table td {
             padding: 12px 16px;
             border-bottom: 1px solid var(--border);
             border-right: 1px solid var(--border);
@@ -456,7 +489,8 @@
         }
 
         /* Primera Columna (Mes) Sticky */
-        table.matrix-table th:first-child, table.matrix-table td:first-child {
+        table.matrix-table th:first-child,
+        table.matrix-table td:first-child {
             position: sticky;
             left: 0;
             background: #f8fafc;
@@ -538,8 +572,15 @@
         }
 
         @keyframes scaleUp {
-            from { transform: scale(0.95); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
         .cell-modal-header {
@@ -618,10 +659,12 @@
                 box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
                 border-color: rgba(239, 68, 68, 0.4);
             }
+
             50% {
                 box-shadow: 0 0 10px 3px rgba(239, 68, 68, 0.2);
                 border-color: rgba(239, 68, 68, 0.8);
             }
+
             100% {
                 box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
                 border-color: rgba(239, 68, 68, 0.4);
@@ -672,7 +715,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* TOAST SYSTEM */
@@ -691,7 +736,7 @@
             border-left: 5px solid var(--primary);
             padding: 12px 18px;
             border-radius: 10px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -704,8 +749,13 @@
             transform: translateX(0);
         }
 
-        .toast-success { border-left-color: var(--success); }
-        .toast-error { border-left-color: var(--danger); }
+        .toast-success {
+            border-left-color: var(--success);
+        }
+
+        .toast-error {
+            border-left-color: var(--danger);
+        }
 
         /* Selector de Propiedades por Pestañas */
         .property-tabs {
@@ -762,7 +812,10 @@
             padding: 1rem;
             animation: fadeIn 0.25s ease;
         }
-        #vencimientosModal.show { display: flex; }
+
+        #vencimientosModal.show {
+            display: flex;
+        }
 
         .venc-modal-box {
             background: var(--surface);
@@ -772,7 +825,7 @@
             max-height: 90vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             border: 1px solid var(--border);
             animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             overflow: hidden;
@@ -788,10 +841,14 @@
             flex-shrink: 0;
         }
 
-        .venc-modal-header-left { display: flex; align-items: center; gap: 12px; }
+        .venc-modal-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
         .venc-modal-icon {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             width: 44px;
             height: 44px;
             border-radius: 12px;
@@ -799,7 +856,7 @@
             align-items: center;
             justify-content: center;
             font-size: 1.3rem;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .venc-modal-title {
@@ -808,6 +865,7 @@
             font-weight: 700;
             letter-spacing: -0.3px;
         }
+
         .venc-modal-subtitle {
             font-size: 0.8rem;
             opacity: 0.85;
@@ -815,8 +873,8 @@
         }
 
         .venc-modal-close {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             color: white;
             width: 34px;
             height: 34px;
@@ -828,7 +886,10 @@
             justify-content: center;
             transition: all 0.2s;
         }
-        .venc-modal-close:hover { background: rgba(255,255,255,0.3); }
+
+        .venc-modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
 
         .venc-modal-summary {
             padding: 1rem 1.5rem;
@@ -838,10 +899,31 @@
             gap: 1.5rem;
             flex-shrink: 0;
         }
-        .venc-summary-item { display: flex; flex-direction: column; gap: 2px; }
-        .venc-summary-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #92400e; letter-spacing: 0.5px; }
-        .venc-summary-val { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 700; color: #d97706; }
-        .venc-summary-val.green { color: #059669; }
+
+        .venc-summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .venc-summary-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #92400e;
+            letter-spacing: 0.5px;
+        }
+
+        .venc-summary-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #d97706;
+        }
+
+        .venc-summary-val.green {
+            color: #059669;
+        }
 
         .venc-modal-body {
             overflow-y: auto;
@@ -863,12 +945,35 @@
             background: #fafafa;
             transition: all 0.2s;
         }
-        .venc-item:hover { background: #f1f5f9; border-color: #94a3b8; }
-        .venc-item.paid-item { background: #f0fdf4; border-color: #86efac; opacity: 0.6; }
-        .venc-item.pending-item { border-color: #fcd34d; background: #fffbeb; }
 
-        .venc-item-info { display: flex; flex-direction: column; gap: 2px; }
-        .venc-item-name { font-weight: 700; font-size: 0.9rem; color: var(--text-primary); }
+        .venc-item:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .venc-item.paid-item {
+            background: #f0fdf4;
+            border-color: #86efac;
+            opacity: 0.6;
+        }
+
+        .venc-item.pending-item {
+            border-color: #fcd34d;
+            background: #fffbeb;
+        }
+
+        .venc-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .venc-item-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
         .venc-item-badge {
             display: inline-flex;
             align-items: center;
@@ -879,9 +984,21 @@
             border-radius: 20px;
             width: fit-content;
         }
-        .badge-unpaid { background: #fee2e2; color: #b91c1c; }
-        .badge-scheduled { background: #fef3c7; color: #92400e; }
-        .badge-done { background: #d1fae5; color: #065f46; }
+
+        .badge-unpaid {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .badge-scheduled {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-done {
+            background: #d1fae5;
+            color: #065f46;
+        }
 
         .venc-item-input {
             width: 130px;
@@ -894,12 +1011,17 @@
             font-family: 'Outfit', sans-serif;
             font-weight: 600;
         }
+
         .venc-item-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
         }
-        .venc-item-input:disabled { background: #f1f5f9; color: #94a3b8; }
+
+        .venc-item-input:disabled {
+            background: #f1f5f9;
+            color: #94a3b8;
+        }
 
         .btn-venc-item-pay {
             background: #10b981;
@@ -918,10 +1040,12 @@
             height: 36px;
             min-width: 85px;
         }
+
         .btn-venc-item-pay:hover {
             background: #059669;
             transform: translateY(-1px);
         }
+
         .btn-venc-item-pay:disabled {
             background: #d1fae5;
             color: #065f46;
@@ -952,9 +1076,13 @@
             align-items: center;
             gap: 8px;
             transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(245,158,11,0.35);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
         }
-        .btn-venc-pay-all:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(245,158,11,0.45); }
+
+        .btn-venc-pay-all:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.45);
+        }
 
         .btn-venc-cancel {
             background: var(--surface);
@@ -967,7 +1095,10 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .btn-venc-cancel:hover { background: #f1f5f9; }
+
+        .btn-venc-cancel:hover {
+            background: #f1f5f9;
+        }
 
         /* Botón header vencimientos */
         .btn-vencimientos {
@@ -985,24 +1116,72 @@
             cursor: pointer;
             animation: pulse-orange 2.5s infinite ease-in-out;
         }
+
         .btn-vencimientos:hover {
             background: rgba(245, 158, 11, 0.35);
             transform: translateY(-2px);
         }
+
         @keyframes pulse-orange {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0);
-                border-color: rgba(245,158,11,0.4); }
-            50% { box-shadow: 0 0 10px 3px rgba(245,158,11,0.25);
-                border-color: rgba(245,158,11,0.8); }
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+                border-color: rgba(245, 158, 11, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 10px 3px rgba(245, 158, 11, 0.25);
+                border-color: rgba(245, 158, 11, 0.8);
+            }
         }
 
-            /* Mobile view overrides */
-            @media (max-width: 600px) {
-                header { padding: 12px 4%; }
-                .desktop-only { display:none !important; }
+        /* Mobile simplified view */
+        .mobile-summary {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 12px 4%;
             }
+
+            .kpi-row,
+            .assistant-panel,
+            .matrix-panel,
+            .filters-row,
+            .table-panel {
+                display: none !important;
+            }
+
+            .mobile-summary {
+                display: block;
+                background: var(--surface);
+                border-radius: 12px;
+                padding: 12px;
+                box-shadow: var(--shadow);
+                margin-bottom: 12px;
+            }
+
+            .btn-mobile-open {
+                display: block;
+                width: 100%;
+                padding: 12px;
+                border-radius: 10px;
+                background: var(--primary);
+                color: white;
+                text-align: center;
+                text-decoration: none;
+                font-weight: 700;
+            }
+
+            .desktop-only {
+                display: none !important;
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <!-- Overlay Procesando -->
@@ -1036,11 +1215,27 @@
     </header>
 
     <div class="container">
-
+        <!-- Mobile summary (visible only on small screens) -->
+        <div class="mobile-summary">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+                <div>
+                    <div style="font-size:0.85rem;color:var(--text-secondary)">Resumen</div>
+                    <div style="font-weight:700;font-size:1.1rem">Pagos pendientes</div>
+                </div>
+                <div style="text-align:right">
+                    <div style="color:var(--primary);font-weight:700" id="mobileTotalPending">-</div>
+                    <div style="font-size:0.75rem;color:var(--text-secondary)">Total estimado</div>
+                </div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px;">
+                <a class="btn-mobile-open" href="pagos.html#full">Abrir versión completa</a>
+            </div>
+        </div>
         <!-- Aviso de Modo Demo -->
         <div id="demoAlert" class="demo-badge" style="display: none;">
             <i class="fa-solid fa-triangle-exclamation"></i>
-            <span><strong>Modo Demo Activo:</strong> Apps Script URL no configurada en `config.js`. Usando base de datos cacheada localmente. Los cambios se guardarán en tu navegador.</span>
+            <span><strong>Modo Demo Activo:</strong> Apps Script URL no configurada en `config.js`. Usando base de datos
+                cacheada localmente. Los cambios se guardarán en tu navegador.</span>
         </div>
 
         <!-- Fila de Indicadores KPI -->
@@ -1060,7 +1255,8 @@
                 <div class="kpi-icon"><i class="fa-solid fa-fire-flame-curved"></i></div>
             </div>
             <!-- KPI Vencimientos Próximo Mes -->
-            <div class="kpi-card" style="border-color: rgba(245,158,11,0.4); cursor:pointer;" onclick="openVencimientosModal()" title="Ver vencimientos">
+            <div class="kpi-card" style="border-color: rgba(245,158,11,0.4); cursor:pointer;"
+                onclick="openVencimientosModal()" title="Ver vencimientos">
                 <div class="kpi-info">
                     <h3 style="color:#92400e;">Sin Pagar (Próx. Mes)</h3>
                     <div class="kpi-value" id="kpiNextMonthUnpaid" style="color:#d97706;">-</div>
@@ -1085,7 +1281,9 @@
                     <label for="smartNLPInput">Carga Rápida con Texto Inteligente</label>
                     <div class="nlp-input-wrapper">
                         <i class="fa-solid fa-keyboard"></i>
-                        <input type="text" id="smartNLPInput" placeholder="Escribe algo como: 'luz mayo 104800' o 'patente etios marzo 25500'" oninput="parseNLPText()">
+                        <input type="text" id="smartNLPInput"
+                            placeholder="Escribe algo como: 'luz mayo 104800' o 'patente etios marzo 25500'"
+                            oninput="parseNLPText()">
                     </div>
                 </div>
                 <div id="nlpPreview" class="nlp-preview-box" style="display: none;"></div>
@@ -1123,7 +1321,9 @@
                     <input type="number" id="inputAmount" step="0.01" placeholder="Ej: 72200" required>
                     <div style="margin-top: 8px; display: flex; align-items: center; gap: 6px;">
                         <input type="checkbox" id="checkPending" style="width: auto; cursor: pointer;">
-                        <label for="checkPending" style="font-size: 0.85rem; color: #b45309; font-weight: 600; cursor: pointer; margin-bottom: 0;"><i class="fa-solid fa-clock"></i> Es un pago PENDIENTE (agendar deuda)</label>
+                        <label for="checkPending"
+                            style="font-size: 0.85rem; color: #b45309; font-weight: 600; cursor: pointer; margin-bottom: 0;"><i
+                                class="fa-solid fa-clock"></i> Es un pago PENDIENTE (agendar deuda)</label>
                     </div>
                 </div>
 
@@ -1138,18 +1338,25 @@
             <div class="matrix-header">
                 <h2>Matriz de Impuestos Anual (BD ASISTENTE)</h2>
                 <span style="font-size:0.8rem; color:var(--text-secondary); font-weight: 500;">
-                    <i class="fa-solid fa-circle-info"></i> Haz clic en la fila para administrar esa fila completa, o haz clic en una celda para editar ese pago.
+                    <i class="fa-solid fa-circle-info"></i> Haz clic en la fila para administrar esa fila completa, o
+                    haz clic en una celda para editar ese pago.
                 </span>
             </div>
 
             <!-- Selector de Propiedades (Pestañas) -->
             <div class="property-tabs">
-                <button class="tab-btn active" onclick="switchPropertyTab('roca')"><i class="fa-solid fa-house"></i> Roca</button>
-                <button class="tab-btn" onclick="switchPropertyTab('moreno')"><i class="fa-solid fa-building"></i> Moreno</button>
-                <button class="tab-btn" onclick="switchPropertyTab('colon')"><i class="fa-solid fa-building"></i> Colón</button>
-                <button class="tab-btn" onclick="switchPropertyTab('gascon')"><i class="fa-solid fa-building"></i> Gascón</button>
-                <button class="tab-btn" onclick="switchPropertyTab('cochera26')"><i class="fa-solid fa-car"></i> Cochera 26</button>
-                <button class="tab-btn" onclick="switchPropertyTab('cochera2')"><i class="fa-solid fa-car"></i> Cochera 2</button>
+                <button class="tab-btn active" onclick="switchPropertyTab('roca')"><i class="fa-solid fa-house"></i>
+                    Roca</button>
+                <button class="tab-btn" onclick="switchPropertyTab('moreno')"><i class="fa-solid fa-building"></i>
+                    Moreno</button>
+                <button class="tab-btn" onclick="switchPropertyTab('colon')"><i class="fa-solid fa-building"></i>
+                    Colón</button>
+                <button class="tab-btn" onclick="switchPropertyTab('gascon')"><i class="fa-solid fa-building"></i>
+                    Gascón</button>
+                <button class="tab-btn" onclick="switchPropertyTab('cochera26')"><i class="fa-solid fa-car"></i> Cochera
+                    26</button>
+                <button class="tab-btn" onclick="switchPropertyTab('cochera2')"><i class="fa-solid fa-car"></i> Cochera
+                    2</button>
             </div>
 
             <div class="matrix-table-container">
@@ -1187,10 +1394,14 @@
             </div>
 
             <!-- Filtros interactivos internos -->
-            <div style="padding: 12px 20px; display: flex; gap: 12px; align-items: center; background: #f8fafc; border-bottom: 1px solid var(--border);">
+            <div
+                style="padding: 12px 20px; display: flex; gap: 12px; align-items: center; background: #f8fafc; border-bottom: 1px solid var(--border);">
                 <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-                    <label style="font-size: 0.72rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px;"><i class="fa-solid fa-house"></i> Propiedad</label>
-                    <select id="vencSelectProperty" onchange="changeVencProperty(this.value)" style="padding: 7px 10px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 0.85rem; font-weight: 600; outline: none; background: white; cursor: pointer; color: var(--text-primary);">
+                    <label
+                        style="font-size: 0.72rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px;"><i
+                            class="fa-solid fa-house"></i> Propiedad</label>
+                    <select id="vencSelectProperty" onchange="changeVencProperty(this.value)"
+                        style="padding: 7px 10px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 0.85rem; font-weight: 600; outline: none; background: white; cursor: pointer; color: var(--text-primary);">
                         <option value="roca">Roca</option>
                         <option value="moreno">Moreno</option>
                         <option value="colon">Colón</option>
@@ -1200,8 +1411,11 @@
                     </select>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-                    <label style="font-size: 0.72rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px;"><i class="fa-solid fa-calendar"></i> Mes a Consultar</label>
-                    <select id="vencSelectMonth" onchange="changeVencMonth(this.value)" style="padding: 7px 10px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 0.85rem; font-weight: 600; outline: none; background: white; cursor: pointer; color: var(--text-primary);">
+                    <label
+                        style="font-size: 0.72rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px;"><i
+                            class="fa-solid fa-calendar"></i> Mes a Consultar</label>
+                    <select id="vencSelectMonth" onchange="changeVencMonth(this.value)"
+                        style="padding: 7px 10px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 0.85rem; font-weight: 600; outline: none; background: white; cursor: pointer; color: var(--text-primary);">
                         <!-- Cargados dinámicamente -->
                     </select>
                 </div>
@@ -1258,7 +1472,9 @@
                     <input type="number" id="modalAmount" step="0.01" placeholder="Ej: 35000">
                     <div style="margin-top: 8px; display: flex; align-items: center; gap: 6px;">
                         <input type="checkbox" id="modalCheckPending" style="width: auto; cursor: pointer;">
-                        <label for="modalCheckPending" style="font-size: 0.85rem; color: #b45309; font-weight: 600; cursor: pointer; margin-bottom: 0;"><i class="fa-solid fa-clock"></i> Es un pago PENDIENTE (agendar deuda)</label>
+                        <label for="modalCheckPending"
+                            style="font-size: 0.85rem; color: #b45309; font-weight: 600; cursor: pointer; margin-bottom: 0;"><i
+                                class="fa-solid fa-clock"></i> Es un pago PENDIENTE (agendar deuda)</label>
                     </div>
                 </div>
             </div>
@@ -1289,7 +1505,9 @@
                     <label>Mes</label>
                     <input type="text" id="rowModalMonth" readonly>
                 </div>
-                <div id="rowModalBody" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; max-height: 420px; overflow:auto; padding-right: 6px;"></div>
+                <div id="rowModalBody"
+                    style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; max-height: 420px; overflow:auto; padding-right: 6px;">
+                </div>
             </div>
             <div class="modal-footer" style="flex-wrap: wrap;">
                 <button class="btn-modal-cancel" onclick="closeRowModal()">Cancelar</button>
@@ -1445,7 +1663,7 @@
         // Cargar y renderizar la matriz de impuestos
         async function loadAndRenderMatrix(forceRefresh = false) {
             setProcessing(true);
-            
+
             if (!SCRIPT_URL || SCRIPT_URL.includes('TU_URL_DE_APPS_SCRIPT_AQUI')) {
                 // Modo demo local de localStorage
                 let localData = localStorage.getItem('demo_impuestos_matrix');
@@ -1470,7 +1688,7 @@
                     } else {
                         throw new Error('Respuesta de lectura fallida');
                     }
-                } catch(e) {
+                } catch (e) {
                     console.warn('Error cargando online, usando caché local:', e);
                     database = JSON.parse(localStorage.getItem('demo_impuestos_matrix') || JSON.stringify(OFFLINE_SEED));
                 }
@@ -1610,7 +1828,7 @@
 
             // Actualizar interfaz
             document.getElementById('kpiTotalPaid').textContent = `$ ${totalPaid.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            
+
             const pendingEl = document.getElementById('kpiPendingCount');
             if (pendingEl) {
                 pendingEl.textContent = pendingCount;
@@ -1621,7 +1839,7 @@
                 highestTitleEl.textContent = `Mayor Gasto de ${currentMonthName}`;
             }
 
-            document.getElementById('kpiHighestService').textContent = highestVal > 0 
+            document.getElementById('kpiHighestService').textContent = highestVal > 0
                 ? `${highestService} ($ ${highestVal.toLocaleString('es-AR', { maximumFractionDigits: 0 })})`
                 : "-";
         }
@@ -1632,7 +1850,7 @@
             const modal = document.getElementById('cellModal');
             document.getElementById('modalTitle').textContent = `${columna} (${mes})`;
             document.getElementById('modalAmount').value = valorActual > 0 ? valorActual : '';
-            
+
             // Mostrar botón de borrado si hay un pago actual (mayor a 0)
             const deleteBtn = document.getElementById('btnDeleteCell');
             if (deleteBtn) {
@@ -1758,10 +1976,10 @@
             if (!confirmed) return;
 
             await updateTaxCell(selectedCellData.mes, selectedCellData.columna, 0);
-            
+
             const checkPend = document.getElementById('modalCheckPending');
             if (checkPend) checkPend.checked = false;
-            
+
             closeCellModal();
         }
 
@@ -1792,23 +2010,23 @@
             try {
                 // Enviar como GET. Al mandar "", Apps Script borrará el contenido de la celda.
                 const url = `${SCRIPT_URL}?action=updateCell&mes=${encodeURIComponent(mes)}&columna=${encodeURIComponent(columna)}&monto=${encodeURIComponent(finalMontoToBackend)}`;
-                
+
                 const response = await fetch(url, {
                     method: 'GET'
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result && result.status === 'success') {
                     showToast('¡Guardado!', `Se actualizó ${columna} (${mes}) en el sistema con éxito.`, 'success');
                 } else {
                     console.error('Error del backend:', result ? result.message : 'Respuesta vacía');
                     showToast('Error', result ? result.message : 'Error al guardar en el sistema.', 'error');
                 }
-                
+
                 // Forzar sincronización limpia en segundo plano para validar
                 setTimeout(() => loadAndRenderMatrix(true), 1500);
-            } catch(e) {
+            } catch (e) {
                 console.error('Sincronizando con backend:', e);
                 showToast('¡Guardado!', `Se envió la actualización de ${columna} (${mes}) al sistema.`, 'success');
                 // Forzar recarga en segundo plano
@@ -1837,7 +2055,7 @@
             const finalAmountToSave = isPending ? `p ${amount}` : amount;
 
             await updateTaxCell(mes, col, finalAmountToSave);
-            
+
             // Limpiar campo de monto
             document.getElementById('inputAmount').value = '';
             document.getElementById('smartNLPInput').value = '';
@@ -1869,7 +2087,7 @@
         function parseNLPText() {
             const text = document.getElementById('smartNLPInput').value;
             const preview = document.getElementById('nlpPreview');
-            
+
             if (!text.trim()) {
                 preview.style.display = 'none';
                 return;
@@ -1906,7 +2124,7 @@
             // Dibujar preview interactivo
             preview.style.display = 'flex';
             let html = '<span style="font-weight:700; color:var(--primary); margin-right:4px;">Detectado:</span> ';
-            
+
             if (detectedProperty) {
                 html += `<span class="badge" style="background:#0284c7; color:white; border-radius:12px; padding:3px 8px; font-size:0.75rem; font-weight:700;"><i class="fa-solid fa-house"></i> ${detectedProperty}</span> `;
             }
@@ -1950,7 +2168,7 @@
             } else {
                 showToast('Asistente Activo', 'Formulario autocompletado con éxito.', 'success');
             }
-            
+
             // Foco
             if (!amount || isSuggested) {
                 document.getElementById('inputAmount').focus();
@@ -1971,10 +2189,10 @@
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            
+
             let icon = 'fa-circle-check';
             if (type === 'error') icon = 'fa-circle-xmark';
-            
+
             toast.innerHTML = `
                 <i class="fa-solid ${icon}" style="font-size: 1.2rem; color: ${type === 'success' ? 'var(--success)' : 'var(--danger)'}"></i>
                 <div>
@@ -1982,10 +2200,10 @@
                     <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">${message}</div>
                 </div>
             `;
-            
+
             container.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 50);
-            
+
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
@@ -2001,7 +2219,7 @@
         function openVencimientosModal(targetMonth = null) {
             // 1. Determinar propiedad por defecto (la seleccionada en la pantalla principal)
             vencimientosActiveProperty = activePropertyTab || 'roca';
-            
+
             // 2. Determinar mes por defecto (el próximo mes respecto al mes actual del sistema)
             if (!targetMonth) {
                 const currentMonthIndex = new Date().getMonth();
@@ -2067,8 +2285,8 @@
             listBody.innerHTML = '';
 
             // Buscar fila del mes seleccionado en la base de datos
-            const rowData = database.find(r => r.Mes && r.Mes.trim().toLowerCase() === vencimientosActiveMonth.trim().toLowerCase()) 
-                            || { "Mes": vencimientosActiveMonth };
+            const rowData = database.find(r => r.Mes && r.Mes.trim().toLowerCase() === vencimientosActiveMonth.trim().toLowerCase())
+                || { "Mes": vencimientosActiveMonth };
 
             // Obtener columnas de la propiedad seleccionada
             const groupCols = PROPERTY_COLUMN_GROUPS[vencimientosActiveProperty] || TAX_COLUMNS;
@@ -2175,25 +2393,25 @@
 
             // Registrar el pago
             await updateTaxCell(vencimientosActiveMonth, columna, amount);
-            
+
             // Recargar la lista del modal
             renderVencimientosList();
         }
 
         async function payAllVencimientos() {
             const groupCols = PROPERTY_COLUMN_GROUPS[vencimientosActiveProperty] || TAX_COLUMNS;
-            
+
             // Recopilar todos los elementos que no están pagados y tienen un monto sugerido válido
             const itemsToPay = [];
-            
-            const rowData = database.find(r => r.Mes && r.Mes.trim().toLowerCase() === vencimientosActiveMonth.trim().toLowerCase()) 
-                            || { "Mes": vencimientosActiveMonth };
+
+            const rowData = database.find(r => r.Mes && r.Mes.trim().toLowerCase() === vencimientosActiveMonth.trim().toLowerCase())
+                || { "Mes": vencimientosActiveMonth };
 
             groupCols.forEach((col, index) => {
                 const val = rowData[col];
                 const inputId = `vencInput_${vencimientosActiveProperty}_${index}`;
                 const inputEl = document.getElementById(inputId);
-                
+
                 // Determinar si ya está pagado en la base de datos real
                 let isPaid = false;
                 if (val !== undefined && val !== null && val !== "" && val !== "-") {
@@ -2240,7 +2458,7 @@
 
             setProcessing(false);
             showToast('¡Proceso Terminado!', `Se registraron los pagos de forma masiva.`, 'success');
-            
+
             // Recargar lista
             renderVencimientosList();
         }
@@ -2312,17 +2530,24 @@
          MODAL DE CONFIRMACIÓN PERSONALIZADO (CUSTOM CONFIRM)
     ===================================================== -->
     <div class="cell-modal-backdrop" id="customConfirmModal" style="z-index: 10010;">
-        <div class="cell-modal-content" style="max-width: 420px; text-align: center; padding: 2rem; border-radius: 20px;">
-            <div id="confirmIcon" class="confirm-icon confirm-danger" style="font-size: 3rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; height: 70px;">
+        <div class="cell-modal-content"
+            style="max-width: 420px; text-align: center; padding: 2rem; border-radius: 20px;">
+            <div id="confirmIcon" class="confirm-icon confirm-danger"
+                style="font-size: 3rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; height: 70px;">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;" id="confirmTitle">Confirmar Acción</h3>
-            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.5rem; padding: 0 10px;" id="confirmMessage">¿Estás seguro?</p>
+            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;"
+                id="confirmTitle">Confirmar Acción</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.5rem; padding: 0 10px;"
+                id="confirmMessage">¿Estás seguro?</p>
             <div style="display: flex; gap: 10px; justify-content: center;">
-                <button class="btn-modal-cancel" id="btnConfirmCancel" style="padding: 10px 20px; font-weight: 600; border-radius: 8px; font-size: 0.85rem; min-width: 100px;">Cancelar</button>
-                <button class="btn-submit" id="btnConfirmAccept" style="padding: 10px 20px; font-weight: 700; border-radius: 8px; font-size: 0.85rem; min-width: 100px;">Aceptar</button>
+                <button class="btn-modal-cancel" id="btnConfirmCancel"
+                    style="padding: 10px 20px; font-weight: 600; border-radius: 8px; font-size: 0.85rem; min-width: 100px;">Cancelar</button>
+                <button class="btn-submit" id="btnConfirmAccept"
+                    style="padding: 10px 20px; font-weight: 700; border-radius: 8px; font-size: 0.85rem; min-width: 100px;">Aceptar</button>
             </div>
         </div>
     </div>
 </body>
+
 </html>

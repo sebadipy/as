@@ -333,10 +333,10 @@ class BotAsistente {
             }
 
             @media (max-width: 768px) {
-                body.bot-active header, body.bot-active .container {
+                header, .container {
                     display: none !important;
                 }
-                body.bot-active .bot-widget {
+                .bot-widget {
                     position: fixed !important;
                     top: 0 !important;
                     left: 0 !important;
@@ -349,24 +349,10 @@ class BotAsistente {
                     padding: 0 !important;
                     z-index: 9999 !important;
                 }
-                body:not(.bot-active) .bot-widget {
-                    position: fixed;
-                    bottom: 25px;
-                    right: 25px;
-                    z-index: 9998;
-                    width: auto;
-                    height: auto;
-                }
-                body.bot-active .bot-bubble-trigger {
+                .bot-bubble-trigger {
                     display: none !important;
                 }
-                body:not(.bot-active) .bot-bubble-trigger {
-                    display: flex !important;
-                }
                 .bot-window {
-                    display: none;
-                }
-                .bot-window.show {
                     position: fixed !important;
                     top: 0 !important;
                     left: 0 !important;
@@ -383,7 +369,7 @@ class BotAsistente {
                     display: flex !important;
                 }
                 .bot-close {
-                    display: block !important;
+                    display: none !important;
                 }
                 .mobile-header-actions {
                     display: flex !important;
@@ -699,7 +685,7 @@ class BotAsistente {
                     </div>
                     <div class="mobile-header-actions">
                         <button disabled title="Alquileres (Próximamente)"><i class="fa-solid fa-house-user"></i></button>
-                        <button type="button" title="Abrir Pagos" onclick="window.botInstance.confirmarAccesoPagos(event)"><i class="fa-solid fa-file-invoice-dollar"></i></button>
+                        <button type="button" title="Abrir Pagos" onclick="event.stopPropagation(); if(window.location.pathname.includes('pagos.html')) { window.botInstance.closeAndClearChat(); } else { window.location.href='pagos.html'; }"><i class="fa-solid fa-file-invoice-dollar"></i></button>
                         <button type="button" title="Abrir Limpieza" onclick="event.stopPropagation(); if(window.location.pathname.includes('limpieza.html')) { window.botInstance.closeAndClearChat(); } else { window.location.href='limpieza.html'; }"><i class="fa-solid fa-broom"></i></button>
                     </div>
                     <button class="bot-close" onclick="window.botInstance.closeAndClearChat()"><i class="fa-solid fa-xmark"></i></button>
@@ -724,20 +710,12 @@ class BotAsistente {
         setTimeout(() => {
             this.sendWelcomeMessage();
         }, 100);
-
-        if (isMobile) {
-            document.body.classList.add('bot-active');
-            setTimeout(() => {
-                const win = document.getElementById('botWindow');
-                if (win) win.classList.add('show');
-            }, 150);
-        }
     }
 
     sendWelcomeMessage() {
         const msgs = document.getElementById('botMessages');
         if (msgs) msgs.innerHTML = '';
-        
+
         this.appendMessage(
             `¡Buenas! 👋 Soy tu asistente personal de impuestos.<br>` +
             `Contame, ¿en qué te puedo dar una mano hoy? Podés preguntarme cosas como:<br><br>` +
@@ -752,11 +730,8 @@ class BotAsistente {
         const win = document.getElementById('botWindow');
         win.classList.toggle('show');
         if (win.classList.contains('show')) {
-            document.body.classList.add('bot-active');
             document.getElementById('botInput').focus();
             this.scrollToBottom();
-        } else {
-            document.body.classList.remove('bot-active');
         }
     }
 
@@ -766,7 +741,6 @@ class BotAsistente {
         if (win) {
             win.classList.remove('show');
         }
-        document.body.classList.remove('bot-active');
 
         // 2. Limpiar el input
         const input = document.getElementById('botInput');
@@ -779,14 +753,6 @@ class BotAsistente {
 
         // 4. Reiniciar los mensajes al estado inicial de bienvenida
         this.sendWelcomeMessage();
-    }
-
-    confirmarAccesoPagos(event) {
-        if (event) event.stopPropagation();
-        if (confirm("¿Desea acceder a la vista de pagos?")) {
-            this.closeAndClearChat();
-            window.location.href = 'pagos.html';
-        }
     }
 
     sendPreset(text) {
@@ -997,8 +963,8 @@ class BotAsistente {
             } else if (this.context.pendingAction === "reviewing_pending") {
                 // Flujo de revisión uno por uno de items pendientes del mes
                 const affirmativeR = ["si", "sii", "dale", "ok", "confirmar", "yes", "bueno", "claro", "obvio"];
-                const negativeR    = ["no", "saltar", "omitir", "skip", "paso"];
-                const confirmAllR  = ["todos", "todo", "confirmar todos", "todos si", "registrar todo"];
+                const negativeR = ["no", "saltar", "omitir", "skip", "paso"];
+                const confirmAllR = ["todos", "todo", "confirmar todos", "todos si", "registrar todo"];
 
                 const { month: mR, pendingItems: pItems, currentIndex: cIdx } = this.context;
 
@@ -1552,7 +1518,7 @@ class BotAsistente {
                     const isPending = q.toLowerCase().includes('pendiente') || q.toLowerCase().includes('deuda') || q.toLowerCase().includes('debo');
                     const finalAmountToSave = isPending ? `p ${detectedAmount}` : detectedAmount;
                     const labelBtn = isPending ? `Asignar PENDIENTE $${detectedAmount.toLocaleString('es-AR')}` : `Pagar $${detectedAmount.toLocaleString('es-AR')}`;
-                    
+
                     reply += `🔴 Detectado en tu mensaje<br>` +
                         `<button class="btn-chat-action" onclick="window.botInstance.confirmPayment('${finalMonth}', '${tax}', '${finalAmountToSave}', this)">` +
                         `<i class="fa-solid fa-floppy-disk"></i> ${labelBtn}</button><br><br>`;
