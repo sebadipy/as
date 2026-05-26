@@ -1491,19 +1491,23 @@
             const records = (alquileresData || []).filter(a => String(a.Ubicacion) === locId);
 
             let suggestedMonto = 0.00;
-            let suggestedRecibo = 1;
 
             if (records.length > 0) {
                 // Ordenar por recibo descendente para tener el último
                 const sorted = [...records].sort((a, b) => (parseInt(b.Recibo) || 0) - (parseInt(a.Recibo) || 0));
                 suggestedMonto = sorted[0].Monto;
-                suggestedRecibo = (parseInt(sorted[0].Recibo) || 0) + 1;
             } else {
                 // Hardcode sugeridos iniciales
                 if (locId === "a53d229d") suggestedMonto = 120000;
                 else if (locId === "91d8ca59") suggestedMonto = 42920;
                 else if (locId === "6499497b") suggestedMonto = 330000;
                 else if (locId === "e978ad70") suggestedMonto = 595482.66;
+            }
+
+            let suggestedRecibo = 247;
+            if (alquileresData && alquileresData.length > 0) {
+                const lastRecibo = alquileresData.reduce((max, r) => Math.max(max, parseInt(r.Recibo) || 0), 0);
+                suggestedRecibo = lastRecibo > 0 ? lastRecibo + 1 : 247;
             }
 
             document.getElementById("formMonto").value = suggestedMonto;
@@ -1576,9 +1580,8 @@
 
             if (isNew) {
                 targetId = "alg_" + Math.random().toString(36).substring(2, 10);
-                // Autocalcular Nro de Recibo correlativo de esta ubicación
-                const records = alquileresData.filter(a => a.Ubicacion === loc);
-                const lastRecibo = records.reduce((max, r) => Math.max(max, parseInt(r.Recibo) || 0), 0);
+                // Autocalcular Nro de Recibo correlativo global
+                const lastRecibo = alquileresData.reduce((max, r) => Math.max(max, parseInt(r.Recibo) || 0), 0);
                 nroRecibo = String(lastRecibo > 0 ? lastRecibo + 1 : 247);
             } else {
                 const rec = alquileresData.find(a => a.ID === id);
