@@ -236,73 +236,78 @@ class BotAsistente {
         this.recognition = null;
         this.isRecording = false;
         if (SpeechRecognition) {
-            this.recognition = new SpeechRecognition();
-            this.recognition.lang = 'es-AR';
-            this.recognition.continuous = false;
-            this.recognition.interimResults = true;
+            try {
+                this.recognition = new SpeechRecognition();
+                this.recognition.lang = 'es-AR';
+                this.recognition.continuous = false;
+                this.recognition.interimResults = true;
 
-            this.recognition.onstart = () => {
-                this.isRecording = true;
-                const micBtn = document.getElementById('botMicBtn');
-                const input = document.getElementById('botInput');
-                if (micBtn) micBtn.classList.add('recording');
-                if (input) {
-                    input.placeholder = "Escuchando... hablá ahora 🎙️";
-                    input.focus();
-                }
-            };
-
-            this.recognition.onresult = (event) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
+                this.recognition.onstart = () => {
+                    this.isRecording = true;
+                    const micBtn = document.getElementById('botMicBtn');
+                    const input = document.getElementById('botInput');
+                    if (micBtn) micBtn.classList.add('recording');
+                    if (input) {
+                        input.placeholder = "Escuchando... hablá ahora 🎙️";
+                        input.focus();
                     }
-                }
-                const input = document.getElementById('botInput');
-                if (input) {
-                    if (finalTranscript) {
-                        input.value = finalTranscript;
-                    } else if (interimTranscript) {
-                        input.value = interimTranscript;
+                };
+
+                this.recognition.onresult = (event) => {
+                    let interimTranscript = '';
+                    let finalTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript;
+                        } else {
+                            interimTranscript += event.results[i][0].transcript;
+                        }
                     }
-                }
-            };
+                    const input = document.getElementById('botInput');
+                    if (input) {
+                        if (finalTranscript) {
+                            input.value = finalTranscript;
+                        } else if (interimTranscript) {
+                            input.value = interimTranscript;
+                        }
+                    }
+                };
 
-            this.recognition.onerror = (event) => {
-                console.error("Speech recognition error:", event.error);
-                this.isRecording = false;
-                const micBtn = document.getElementById('botMicBtn');
-                if (micBtn) micBtn.classList.remove('recording');
-                
-                const input = document.getElementById('botInput');
-                if (input) input.placeholder = "Escribe un mensaje...";
+                this.recognition.onerror = (event) => {
+                    console.error("Speech recognition error:", event.error);
+                    this.isRecording = false;
+                    const micBtn = document.getElementById('botMicBtn');
+                    if (micBtn) micBtn.classList.remove('recording');
+                    
+                    const input = document.getElementById('botInput');
+                    if (input) input.placeholder = "Escribe un mensaje...";
 
-                if (event.error === 'not-allowed') {
-                    this.appendMessage(
-                        `⚠️ **Permiso denegado:** No tengo acceso al micrófono. Habilitalo en la configuración del navegador para poder dictar.`,
-                        'bot'
-                    );
-                } else if (event.error !== 'no-speech') {
-                    this.appendMessage(
-                        `⚠️ **Error de dictado:** Ocurrió un inconveniente con el reconocimiento de voz (${event.error}). Intentá de nuevo.`,
-                        'bot'
-                    );
-                }
-            };
+                    if (event.error === 'not-allowed') {
+                        this.appendMessage(
+                            `⚠️ **Permiso denegado:** No tengo acceso al micrófono. Habilitalo en la configuración del navegador para poder dictar.`,
+                            'bot'
+                        );
+                    } else if (event.error !== 'no-speech') {
+                        this.appendMessage(
+                            `⚠️ **Error de dictado:** Ocurrió un inconveniente con el reconocimiento de voz (${event.error}). Intentá de nuevo.`,
+                            'bot'
+                        );
+                    }
+                };
 
-            this.recognition.onend = () => {
-                this.isRecording = false;
-                const micBtn = document.getElementById('botMicBtn');
-                if (micBtn) micBtn.classList.remove('recording');
-                const input = document.getElementById('botInput');
-                if (input && input.placeholder.includes("Escuchando")) {
-                    input.placeholder = "Escribe un mensaje...";
-                }
-            };
+                this.recognition.onend = () => {
+                    this.isRecording = false;
+                    const micBtn = document.getElementById('botMicBtn');
+                    if (micBtn) micBtn.classList.remove('recording');
+                    const input = document.getElementById('botInput');
+                    if (input && input.placeholder.includes("Escuchando")) {
+                        input.placeholder = "Escribe un mensaje...";
+                    }
+                };
+            } catch (err) {
+                console.error("SpeechRecognition initialization failed:", err);
+                this.recognition = null;
+            }
         }
 
         this.initUI();
