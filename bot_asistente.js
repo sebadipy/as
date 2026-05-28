@@ -2015,35 +2015,114 @@ class BotAsistente {
             const text = result.data.text;
             console.log("Texto extraído por OCR:", text);
 
-            const parsed = window.SmartNLPParser.parse(text);
-            const detectedAmount = this.extractAmountFromText(text) || parsed.detectedAmount;
-            
-            let detectedPropertyKey = window.activePropertyTab || 'roca';
-            
-            if (parsed.detectedProperty) {
-                const label = parsed.detectedProperty.toLowerCase();
-                if (label.includes('roca') || label.includes('casa')) detectedPropertyKey = 'roca';
-                else if (label.includes('moreno')) detectedPropertyKey = 'moreno';
-                else if (label.includes('colon')) detectedPropertyKey = 'colon';
-                else if (label.includes('gascon')) detectedPropertyKey = 'gascon';
-                else if (label.includes('cochera26') || label.includes('cochera 26')) detectedPropertyKey = 'cochera26';
-                else if (label.includes('cochera2') || label.includes('cochera 2')) detectedPropertyKey = 'cochera2';
-            } else if (parsed.detectedTax) {
-                const activeGroups = window.PROPERTY_COLUMN_GROUPS || {};
-                for (const [propKey, cols] of Object.entries(activeGroups)) {
-                    if (cols.includes(parsed.detectedTax)) {
-                        detectedPropertyKey = propKey;
-                        break;
+            // 1. Encontrar todos los vencimientos en el texto
+            const dateRegex = /(?:vto|vencimiento|vence)\s*[\.:]?\s*(\d{2})[\/-](\d{2})[\/-](\d{2,4})/gi;
+            const dateMatches = [];
+            let match;
+            while ((match = dateRegex.exec(text)) !== null) {
+                dateMatches.push({
+                    index: match.index,
+                    text: match[0],
+                    monthNum: parseInt(match[2], 10),
+                    year: match[3]
+                });
+            }
+
+            const bills = [];
+
+            if (dateMatches.length > 1) {
+                // Hay más de un vencimiento detectado: particionar el texto en bloques
+                for (let i = 0; i < dateMatches.length; i++) {
+                    // Para facturas apiladas verticalmente donde el monto está al principio (ej: Edea), 
+                    // cada bloque debe terminar justo después de su respectiva fecha de vencimiento.
+                    const startIdx = i === 0 ? 0 : dateMatches[i - 1].index + 10;
+                    const endIdx = i === dateMatches.length - 1 ? text.length : dateMatches[i].index + 10;
+                    const block = text.substring(startIdx, endIdx);
+
+                    // Analizar el bloque individualmente
+                    const parsed = window.SmartNLPParser.parse(block);
+                    const detectedAmount = this.extractAmountFromText(block) || parsed.detectedAmount;
+                    
+                    let detectedPropertyKey = window.activePropertyTab || 'roca';
+                    if (parsed.detectedProperty) {
+                        const label = parsed.detectedProperty.toLowerCase();
+                        if (label.includes('roca') || label.includes('casa')) detectedPropertyKey = 'roca';
+                        else if (label.includes('moreno')) detectedPropertyKey = 'moreno';
+                        else if (label.includes('colon')) detectedPropertyKey = 'colon';
+                        else if (label.includes('gascon')) detectedPropertyKey = 'gascon';
+                        else if (label.includes('cochera26') || label.includes('cochera 26')) detectedPropertyKey = 'cochera26';
+                        else if (label.includes('cochera2') || label.includes('cochera 2')) detectedPropertyKey = 'cochera2';
+                    } else if (parsed.detectedTax) {
+                        const activeGroups = window.PROPERTY_COLUMN_GROUPS || {};
+                        for (const [propKey, cols] of Object.entries(activeGroups)) {
+                            if (cols.includes(parsed.detectedTax)) {
+                                detectedPropertyKey = propKey;
+                                break;
+                            }
+                        }
+                    }
+
+                    const detectedTax = parsed.detectedTax;
+                    
+                    // Obtener mes de la fecha de este bloque específico
+                    let detectedMonth = parsed.detectedMonth || this.getCurrentMonthName();
+                    const monthNum = dateMatches[i].monthNum;
+                    if (monthNum >= 1 && monthNum <= 12) {
+                        detectedMonth = this.MONTHS[monthNum - 1];
+                    }
+
+                    if (detectedTax || detectedAmount) {
+                        bills.push({
+                            propertyKey: detectedPropertyKey,
+                            taxName: detectedTax,
+                            amount: detectedAmount,
+                            month: detectedMonth
+                        });
                     }
                 }
             }
 
-            const detectedTax = parsed.detectedTax;
-            const dateMonth = this.detectMonthFromExpirationDate(text);
-            const detectedMonth = dateMonth || parsed.detectedMonth || this.getCurrentMonthName();
-
             this.hideTypingIndicator();
-            this.sendOcrResultForm(detectedPropertyKey, detectedTax, detectedAmount, detectedMonth);
+
+            if (bills.length > 1) {
+                // Registrar contexto de carga secuencial
+                this.context = {
+                    pendingAction: "ocr_sequential",
+                    index: 0,
+                    bills: bills
+                };
+                this.appendMessage(`🔍 **Encontré ${bills.length} facturas en la imagen.** Vamos a registrarlas de a una:`, 'bot');
+                this.presentNextOcrBill();
+            } else {
+                // Fallback a una sola factura (comportamiento original)
+                const parsed = window.SmartNLPParser.parse(text);
+                const detectedAmount = this.extractAmountFromText(text) || parsed.detectedAmount;
+                
+                let detectedPropertyKey = window.activePropertyTab || 'roca';
+                if (parsed.detectedProperty) {
+                    const label = parsed.detectedProperty.toLowerCase();
+                    if (label.includes('roca') || label.includes('casa')) detectedPropertyKey = 'roca';
+                    else if (label.includes('moreno')) detectedPropertyKey = 'moreno';
+                    else if (label.includes('colon')) detectedPropertyKey = 'colon';
+                    else if (label.includes('gascon')) detectedPropertyKey = 'gascon';
+                    else if (label.includes('cochera26') || label.includes('cochera 26')) detectedPropertyKey = 'cochera26';
+                    else if (label.includes('cochera2') || label.includes('cochera 2')) detectedPropertyKey = 'cochera2';
+                } else if (parsed.detectedTax) {
+                    const activeGroups = window.PROPERTY_COLUMN_GROUPS || {};
+                    for (const [propKey, cols] of Object.entries(activeGroups)) {
+                        if (cols.includes(parsed.detectedTax)) {
+                            detectedPropertyKey = propKey;
+                            break;
+                        }
+                    }
+                }
+
+                const detectedTax = parsed.detectedTax;
+                const dateMonth = this.detectMonthFromExpirationDate(text);
+                const detectedMonth = dateMonth || parsed.detectedMonth || this.getCurrentMonthName();
+
+                this.sendOcrResultForm(detectedPropertyKey, detectedTax, detectedAmount, detectedMonth);
+            }
         } catch (err) {
             console.error("OCR Error:", err);
             this.hideTypingIndicator();
@@ -2233,10 +2312,11 @@ class BotAsistente {
         form.querySelectorAll('input, select, button').forEach(el => el.disabled = true);
 
         // Cambiar estilo del botón pulsado para dar feedback de éxito
-        btn.innerHTML = `<i class="fa-solid fa-check-double"></i> ¡Guardado!`;
         if (isPending) {
+            btn.innerHTML = `<i class="fa-solid fa-clock"></i> ¡Pendiente!`;
             btn.style.background = "#d97706";
         } else {
+            btn.innerHTML = `<i class="fa-solid fa-check-double"></i> ¡Registrado!`;
             btn.style.background = "#15803d";
         }
 
@@ -2273,9 +2353,31 @@ class BotAsistente {
                 `Ya se guardó y actualizó en el tablero de control.`,
                 'bot'
             );
+
+            // Si estamos en un proceso secuencial de múltiples facturas, avanzar al siguiente
+            if (this.context && this.context.pendingAction === "ocr_sequential") {
+                this.context.index++;
+                setTimeout(() => {
+                    this.presentNextOcrBill();
+                }, 1000);
+            }
         } else {
             alert("Error: No se pudo conectar con el sistema de carga.");
         }
+    }
+
+    presentNextOcrBill() {
+        if (!this.context || this.context.pendingAction !== "ocr_sequential") return;
+        const { index, bills } = this.context;
+        if (index >= bills.length) {
+            this.context = null;
+            this.appendMessage("🎉 **¡Listo!** Ya procesamos todas las facturas que estaban en la imagen. 👍", 'bot');
+            return;
+        }
+
+        const bill = bills[index];
+        this.appendMessage(`📄 **Factura ${index + 1} de ${bills.length}:**`, 'bot');
+        this.sendOcrResultForm(bill.propertyKey, bill.taxName, bill.amount, bill.month);
     }
 }
 
