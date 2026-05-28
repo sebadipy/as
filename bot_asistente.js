@@ -231,6 +231,80 @@ class BotAsistente {
             return undefined;
         };
 
+        // Inicializar reconocimiento de voz
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        this.recognition = null;
+        this.isRecording = false;
+        if (SpeechRecognition) {
+            this.recognition = new SpeechRecognition();
+            this.recognition.lang = 'es-AR';
+            this.recognition.continuous = false;
+            this.recognition.interimResults = true;
+
+            this.recognition.onstart = () => {
+                this.isRecording = true;
+                const micBtn = document.getElementById('botMicBtn');
+                const input = document.getElementById('botInput');
+                if (micBtn) micBtn.classList.add('recording');
+                if (input) {
+                    input.placeholder = "Escuchando... hablá ahora 🎙️";
+                    input.focus();
+                }
+            };
+
+            this.recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                const input = document.getElementById('botInput');
+                if (input) {
+                    if (finalTranscript) {
+                        input.value = finalTranscript;
+                    } else if (interimTranscript) {
+                        input.value = interimTranscript;
+                    }
+                }
+            };
+
+            this.recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                this.isRecording = false;
+                const micBtn = document.getElementById('botMicBtn');
+                if (micBtn) micBtn.classList.remove('recording');
+                
+                const input = document.getElementById('botInput');
+                if (input) input.placeholder = "Escribe un mensaje...";
+
+                if (event.error === 'not-allowed') {
+                    this.appendMessage(
+                        `⚠️ **Permiso denegado:** No tengo acceso al micrófono. Habilitalo en la configuración del navegador para poder dictar.`,
+                        'bot'
+                    );
+                } else if (event.error !== 'no-speech') {
+                    this.appendMessage(
+                        `⚠️ **Error de dictado:** Ocurrió un inconveniente con el reconocimiento de voz (${event.error}). Intentá de nuevo.`,
+                        'bot'
+                    );
+                }
+            };
+
+            this.recognition.onend = () => {
+                this.isRecording = false;
+                const micBtn = document.getElementById('botMicBtn');
+                if (micBtn) micBtn.classList.remove('recording');
+                const input = document.getElementById('botInput');
+                if (input && input.placeholder.includes("Escuchando")) {
+                    input.placeholder = "Escribe un mensaje...";
+                }
+            };
+        }
+
         this.initUI();
     }
 
@@ -652,6 +726,57 @@ class BotAsistente {
                 min-width: 0;
             }
 
+            .bot-mic-btn {
+                background: none;
+                border: none;
+                color: #8696a0;
+                font-size: 1.1rem;
+                cursor: pointer;
+                padding: 4px;
+                margin-left: 4px;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                transition: color 0.2s, transform 0.2s;
+                flex-shrink: 0;
+            }
+
+            .bot-mic-btn:hover {
+                color: #54656f;
+                transform: scale(1.1);
+            }
+
+            .bot-attachment-btn {
+                background: none;
+                border: none;
+                color: #8696a0;
+                font-size: 1.1rem;
+                cursor: pointer;
+                padding: 4px;
+                margin-left: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: color 0.2s, transform 0.2s;
+                flex-shrink: 0;
+            }
+
+            .bot-attachment-btn:hover {
+                color: #54656f;
+                transform: scale(1.1);
+            }
+
+            .bot-mic-btn.recording {
+                color: #ea4335;
+                animation: bot-mic-pulse 1.5s infinite ease-in-out;
+            }
+
+            @keyframes bot-mic-pulse {
+                0% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.2); opacity: 0.7; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+
             .bot-send-btn {
                 width: 38px;
                 height: 38px;
@@ -707,12 +832,19 @@ class BotAsistente {
                 <div class="bot-input-area">
                     <div class="wa-input-container">
                         <input type="text" id="botInput" placeholder="Escribe un mensaje..." onkeypress="window.botInstance.handleKeyPress(event)">
+                        <button class="bot-attachment-btn" id="botAttachmentBtn" onclick="window.botInstance.triggerImageUpload(event)" title="Subir o tomar foto de factura">
+                            <i class="fa-solid fa-camera"></i>
+                        </button>
+                        <button class="bot-mic-btn" id="botMicBtn" onclick="window.botInstance.toggleDictation(event)" title="Dictar por voz">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
                     </div>
                     <button class="bot-send-btn" id="botSendBtn" onclick="window.botInstance.submitUserMessage()">
                         <i class="fa-solid fa-paper-plane" id="botSendIcon"></i>
                     </button>
                 </div>
             </div>
+            <input type="file" id="botImageInput" accept="image/*" style="display: none;" onchange="window.botInstance.handleImageUpload(event)">
         `;
         document.body.appendChild(widget);
 
@@ -730,6 +862,12 @@ class BotAsistente {
                 const win = document.getElementById('botWindow');
                 if (win) win.classList.add('show');
             }, 150);
+        }
+
+        // Mostrar botón de micrófono si el reconocimiento de voz está disponible
+        if (this.recognition) {
+            const micBtn = document.getElementById('botMicBtn');
+            if (micBtn) micBtn.style.display = 'flex';
         }
     }
 
@@ -789,6 +927,24 @@ class BotAsistente {
     handleKeyPress(event) {
         if (event.key === 'Enter') {
             this.submitUserMessage();
+        }
+    }
+
+    toggleDictation(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        if (!this.recognition) return;
+
+        if (this.isRecording) {
+            this.recognition.stop();
+        } else {
+            try {
+                this.recognition.start();
+            } catch (err) {
+                console.error("Error starting SpeechRecognition:", err);
+            }
         }
     }
 
@@ -1762,6 +1918,329 @@ class BotAsistente {
             }
         }
         return null;
+    }
+
+    triggerImageUpload(event) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        const fileInput = document.getElementById('botImageInput');
+        if (fileInput) {
+            fileInput.value = ''; // Reset to enable triggering change on same file
+            fileInput.click();
+        }
+    }
+
+    handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const dataUrl = e.target.result;
+            // 1. Mostrar la imagen en el chat
+            const imgHtml = `<div style="margin-top: 4px;"><img src="${dataUrl}" style="max-width: 100%; max-height: 180px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);"></div>`;
+            this.appendMessage(imgHtml, 'user');
+            
+            // 2. Mostrar indicador de pensando
+            this.showTypingIndicator();
+            
+            // 3. Ejecutar reconocimiento OCR
+            this.runOcrOnImage(file);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    loadTesseractScript() {
+        return new Promise((resolve, reject) => {
+            if (window.Tesseract) {
+                resolve();
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+            script.onload = () => resolve();
+            script.onerror = (err) => reject(err);
+            document.head.appendChild(script);
+        });
+    }
+
+    async runOcrOnImage(file) {
+        if (!window.Tesseract) {
+            try {
+                await this.loadTesseractScript();
+            } catch (err) {
+                this.hideTypingIndicator();
+                this.appendMessage("⚠️ **Error:** No se pudo cargar el motor OCR. Por favor, verificá tu conexión a internet.", "bot");
+                return;
+            }
+        }
+
+        try {
+            const result = await Tesseract.recognize(file, 'spa');
+            const text = result.data.text;
+            console.log("Texto extraído por OCR:", text);
+
+            const parsed = window.SmartNLPParser.parse(text);
+            const detectedAmount = this.extractAmountFromText(text) || parsed.detectedAmount;
+            
+            let detectedPropertyKey = window.activePropertyTab || 'roca';
+            
+            if (parsed.detectedProperty) {
+                const label = parsed.detectedProperty.toLowerCase();
+                if (label.includes('roca') || label.includes('casa')) detectedPropertyKey = 'roca';
+                else if (label.includes('moreno')) detectedPropertyKey = 'moreno';
+                else if (label.includes('colon')) detectedPropertyKey = 'colon';
+                else if (label.includes('gascon')) detectedPropertyKey = 'gascon';
+                else if (label.includes('cochera26') || label.includes('cochera 26')) detectedPropertyKey = 'cochera26';
+                else if (label.includes('cochera2') || label.includes('cochera 2')) detectedPropertyKey = 'cochera2';
+            } else if (parsed.detectedTax) {
+                const activeGroups = window.PROPERTY_COLUMN_GROUPS || {};
+                for (const [propKey, cols] of Object.entries(activeGroups)) {
+                    if (cols.includes(parsed.detectedTax)) {
+                        detectedPropertyKey = propKey;
+                        break;
+                    }
+                }
+            }
+
+            const detectedTax = parsed.detectedTax;
+            const detectedMonth = parsed.detectedMonth || this.getCurrentMonthName();
+
+            this.hideTypingIndicator();
+            this.sendOcrResultForm(detectedPropertyKey, detectedTax, detectedAmount, detectedMonth);
+        } catch (err) {
+            console.error("OCR Error:", err);
+            this.hideTypingIndicator();
+            this.appendMessage("⚠️ No pude reconocer el texto de la imagen con claridad. ¿Podrías intentar sacándole otra foto más nítida y centrada?", "bot");
+        }
+    }
+
+    extractAmountFromText(text) {
+        let cleaned = text.replace(/\$\s+/g, "$");
+        const regex = /\$?(\b\d{1,3}(?:\.\d{3})*(?:,\d{2})?\b|\b\d+(?:\.\d{2})?\b)/g;
+        let matches = cleaned.match(regex) || [];
+        
+        let candidates = [];
+        for (let m of matches) {
+            let valStr = m.replace('$', '').trim();
+            if (valStr.length > 8) continue; // Descartar números muy largos (códigos de barra)
+            
+            let normalized = valStr;
+            if (normalized.includes('.') && normalized.includes(',')) {
+                normalized = normalized.replace(/\./g, '').replace(',', '.');
+            } else if (normalized.includes(',')) {
+                const parts = normalized.split(',');
+                if (parts[1].length === 3) {
+                    normalized = normalized.replace(/,/g, '');
+                } else {
+                    normalized = normalized.replace(/,/g, '.');
+                }
+            } else if (normalized.includes('.')) {
+                const parts = normalized.split('.');
+                if (parts[1].length === 3) {
+                    normalized = normalized.replace(/\./g, '');
+                }
+            }
+            
+            const num = parseFloat(normalized);
+            if (!isNaN(num) && num > 0 && num !== 2025 && num !== 2026) {
+                candidates.push(num);
+            }
+        }
+        
+        if (candidates.length === 0) return null;
+        
+        const lowerText = cleaned.toLowerCase();
+        const keywords = ["total", "pagar", "importe", "monto", "vencimiento"];
+        
+        let bestCandidate = null;
+        let minDistance = Infinity;
+        
+        keywords.forEach(kw => {
+            let idx = lowerText.indexOf(kw);
+            if (idx !== -1) {
+                candidates.forEach(c => {
+                    let cStr = c.toString();
+                    let cIdx = lowerText.indexOf(cStr, Math.max(0, idx - 100));
+                    if (cIdx !== -1) {
+                        let dist = Math.abs(cIdx - idx);
+                        if (dist < minDistance && dist < 150) {
+                            minDistance = dist;
+                            bestCandidate = c;
+                        }
+                    }
+                });
+            }
+        });
+        
+        if (bestCandidate) return bestCandidate;
+        
+        const filtered = candidates.filter(c => c < 1000000);
+        if (filtered.length > 0) {
+            return Math.max(...filtered);
+        }
+        
+        return null;
+    }
+
+    sendOcrResultForm(propertyKey, taxName, amount, month) {
+        const activeGroups = window.PROPERTY_COLUMN_GROUPS || {};
+        
+        const properties = [
+            { key: "roca", label: "Roca" },
+            { key: "moreno", label: "Moreno" },
+            { key: "colon", label: "Colon" },
+            { key: "gascon", label: "Gascon" },
+            { key: "cochera26", label: "Cochera 26" },
+            { key: "cochera2", label: "Cochera 2" }
+        ];
+
+        let propertyOptions = properties.map(p => 
+            `<option value="${p.key}" ${p.key === propertyKey ? 'selected' : ''}>${p.label}</option>`
+        ).join('');
+
+        const cols = activeGroups[propertyKey] || window.TAX_COLUMNS || [];
+        let taxOptions = cols.map(c => 
+            `<option value="${c}" ${c === taxName ? 'selected' : ''}>${c}</option>`
+        ).join('');
+
+        let monthOptions = this.MONTHS.map(m => 
+            `<option value="${m}" ${m === month ? 'selected' : ''}>${m}</option>`
+        ).join('');
+
+        const html = `
+            <div class="ocr-result-form" style="display: flex; flex-direction: column; gap: 8px; padding: 4px 0;">
+                <div style="font-weight: bold; margin-bottom: 2px;">🔍 Datos detectados en la imagen:</div>
+                
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <label style="font-size: 0.7rem; color: #555; font-weight: bold; text-transform: uppercase;">PROPIEDAD</label>
+                    <select class="ocr-property-select" onchange="window.botInstance.handleOcrPropertyChange(this)" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.8rem; background: white; outline: none; font-family: inherit;">
+                        ${propertyOptions}
+                    </select>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <label style="font-size: 0.7rem; color: #555; font-weight: bold; text-transform: uppercase;">SERVICIO / IMPUESTO</label>
+                    <select class="ocr-tax-select" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.8rem; background: white; outline: none; font-family: inherit;">
+                        ${taxOptions}
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 8px;">
+                    <div style="flex: 1.2; display: flex; flex-direction: column; gap: 2px;">
+                        <label style="font-size: 0.7rem; color: #555; font-weight: bold; text-transform: uppercase;">MONTO ($)</label>
+                        <input type="number" class="ocr-amount-input" value="${amount || ''}" placeholder="Monto" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.8rem; box-sizing: border-box; background: white; outline: none; font-family: inherit;">
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+                        <label style="font-size: 0.7rem; color: #555; font-weight: bold; text-transform: uppercase;">MES</label>
+                        <select class="ocr-month-select" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.8rem; background: white; outline: none; font-family: inherit;">
+                            ${monthOptions}
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-top: 6px;">
+                    <button class="btn-chat-action" style="flex: 1; justify-content: center; background: #25D366; margin: 0; padding: 7px 0; border-radius: 6px; font-size: 0.8rem;" onclick="window.botInstance.saveOcrResult(false, this)">
+                        <i class="fa-solid fa-check"></i> Registrar Pago
+                    </button>
+                    <button class="btn-chat-action" style="flex: 1; justify-content: center; background: #f59e0b; margin: 0; padding: 7px 0; border-radius: 6px; font-size: 0.8rem;" onclick="window.botInstance.saveOcrResult(true, this)">
+                        <i class="fa-solid fa-clock"></i> Pendiente
+                    </button>
+                </div>
+            </div>
+        `;
+
+        this.appendMessage(html, 'bot');
+    }
+
+    handleOcrPropertyChange(selectElement) {
+        const form = selectElement.closest('.ocr-result-form');
+        if (!form) return;
+        const propertyKey = selectElement.value;
+        const taxSelect = form.querySelector('.ocr-tax-select');
+        if (!taxSelect) return;
+
+        const activeGroups = window.PROPERTY_COLUMN_GROUPS || {};
+        const columns = activeGroups[propertyKey] || window.TAX_COLUMNS || [];
+
+        taxSelect.innerHTML = '';
+        columns.forEach(col => {
+            const option = document.createElement('option');
+            option.value = col;
+            option.textContent = col;
+            taxSelect.appendChild(option);
+        });
+    }
+
+    saveOcrResult(isPending, btn) {
+        const form = btn.closest('.ocr-result-form');
+        if (!form) return;
+
+        const taxSelect = form.querySelector('.ocr-tax-select');
+        const amountInput = form.querySelector('.ocr-amount-input');
+        const monthSelect = form.querySelector('.ocr-month-select');
+        const propertySelect = form.querySelector('.ocr-property-select');
+
+        const tax = taxSelect.value;
+        const amountVal = amountInput.value;
+        const month = monthSelect.value;
+        const propertyKey = propertySelect.value;
+
+        const amount = parseFloat(amountVal);
+        if (isNaN(amount) || amount <= 0) {
+            alert("Por favor, ingresá un monto válido.");
+            return;
+        }
+
+        // Deshabilitar inputs y botones
+        form.querySelectorAll('input, select, button').forEach(el => el.disabled = true);
+
+        // Cambiar estilo del botón pulsado para dar feedback de éxito
+        btn.innerHTML = `<i class="fa-solid fa-check-double"></i> ¡Guardado!`;
+        if (isPending) {
+            btn.style.background = "#d97706";
+        } else {
+            btn.style.background = "#15803d";
+        }
+
+        // Clickea la pestaña de la propiedad para que el usuario visualice el cambio en el tablero principal
+        const tabBtn = document.querySelector(`button[onclick*="'${propertyKey}'"]`);
+        if (tabBtn) {
+            tabBtn.click();
+        }
+
+        // Guardar celda en base de datos
+        if (window.updateTaxCell) {
+            const finalValue = isPending ? `p ${amount}` : amount;
+            window.updateTaxCell(month, tax, finalValue);
+            
+            const statusText = isPending ? 'PENDIENTE' : 'PAGADO';
+            const icon = isPending ? '🕐' : '⚡';
+            
+            const propLabels = {
+                "roca": "Roca",
+                "moreno": "Moreno",
+                "colon": "Colon",
+                "gascon": "Gascon",
+                "cochera26": "Cochera 26",
+                "cochera2": "Cochera 2"
+            };
+            const propLabel = propLabels[propertyKey] || propertyKey;
+
+            this.appendMessage(
+                `${icon} **¡Factura registrada!**<br><br>` +
+                `• Servicio: <strong>${tax}</strong><br>` +
+                `• Propiedad: <strong>${propLabel}</strong><br>` +
+                `• Mes: <strong>${month}</strong><br>` +
+                `• Monto: <strong>$${amount.toLocaleString('es-AR')}</strong> (${statusText})<br><br>` +
+                `Ya se guardó y actualizó en el tablero de control.`,
+                'bot'
+            );
+        } else {
+            alert("Error: No se pudo conectar con el sistema de carga.");
+        }
     }
 }
 
