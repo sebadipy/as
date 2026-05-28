@@ -22,6 +22,11 @@ const SmartNLPParser = {
     // Synonyms mapping for taxes/services
     SYNONYMS: {
         "edea": "Luz",
+        "distribuidora de energia atlantica": "Luz",
+        "distribuidora de energia": "Luz",
+        "energia atlantica": "Luz",
+        "empresa distribuidora": "Luz",
+        "atlantica": "Luz",
         "luz": "Luz",
         "camuzzi": "Gas",
         "gas": "Gas",
@@ -1925,6 +1930,29 @@ class BotAsistente {
         return null;
     }
 
+    detectMonthFromExpirationDate(text) {
+        // Regex para buscar fechas de vencimiento en formatos DD/MM/YYYY o DD/MM/YY
+        const regex = /(?:vto|vencimiento|vence)\s*[\.:]?\s*(\d{2})[\/-](\d{2})[\/-](\d{2,4})/i;
+        const match = text.match(regex);
+        if (match) {
+            const monthNum = parseInt(match[2], 10);
+            if (monthNum >= 1 && monthNum <= 12) {
+                return this.MONTHS[monthNum - 1];
+            }
+        }
+        
+        // Fallback: Cualquier fecha DD/MM/YYYY en el texto
+        const fallbackRegex = /\b(\d{2})[\/-](\d{2})[\/-](\d{4})\b/;
+        const fallbackMatch = text.match(fallbackRegex);
+        if (fallbackMatch) {
+            const monthNum = parseInt(fallbackMatch[2], 10);
+            if (monthNum >= 1 && monthNum <= 12) {
+                return this.MONTHS[monthNum - 1];
+            }
+        }
+        return null;
+    }
+
     triggerImageUpload(event) {
         if (event) {
             event.preventDefault();
@@ -2011,7 +2039,8 @@ class BotAsistente {
             }
 
             const detectedTax = parsed.detectedTax;
-            const detectedMonth = parsed.detectedMonth || this.getCurrentMonthName();
+            const dateMonth = this.detectMonthFromExpirationDate(text);
+            const detectedMonth = dateMonth || parsed.detectedMonth || this.getCurrentMonthName();
 
             this.hideTypingIndicator();
             this.sendOcrResultForm(detectedPropertyKey, detectedTax, detectedAmount, detectedMonth);
@@ -2030,7 +2059,8 @@ class BotAsistente {
         let candidates = [];
         for (let m of matches) {
             let valStr = m.replace('$', '').trim();
-            if (valStr.length > 8) continue; // Descartar números muy largos (códigos de barra)
+            // Descartar códigos de barra largos (más de 9 dígitos numéricos sin contar comas/puntos)
+            if (valStr.replace(/[\.,]/g, '').length > 9) continue;
             
             let normalized = valStr;
             if (normalized.includes('.') && normalized.includes(',')) {
