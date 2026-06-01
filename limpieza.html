@@ -646,14 +646,7 @@
 
         /* Formulas info badge */
         .formula-info-badge {
-            font-size: 0.72rem;
-            color: var(--primary-dark);
-            background: #e6fcf5;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-family: monospace;
-            margin-top: 2px;
-            display: inline-block;
+            display: none;
         }
 
         .modal-footer {
@@ -1030,7 +1023,6 @@
                 <div class="form-group">
                     <label for="formValorAntiguedad">Monto Antigüedad ($)</label>
                     <input type="number" id="formValorAntiguedad" readonly>
-                    <span class="formula-info-badge">Antiguedad ? 0 : Horas * ValorHora * 5% * Años</span>
                 </div>
 
                 <!-- Viajes Colectivos -->
@@ -1043,7 +1035,6 @@
                 <div class="form-group">
                     <label for="formDeposito">Depósito Semanal ($)</label>
                     <input type="number" id="formDeposito" readonly>
-                    <span class="formula-info-badge">(ValorHora * Horas) + Viajes</span>
                 </div>
 
                 <!-- Días Licencia Anual -->
@@ -1062,7 +1053,6 @@
                 <div class="form-group">
                     <label for="formLicenciaRestante">Licencia Restante (Días)</label>
                     <input type="number" id="formLicenciaRestante" readonly>
-                    <span class="formula-info-badge">LicenciaAnual - LicenciaGozada</span>
                 </div>
 
                 <!-- Fechas Gozadas -->
@@ -1075,7 +1065,6 @@
                 <div class="form-group form-group-full">
                     <label for="formPagoMensual">Pago Mensual Final ($)</label>
                     <input type="number" id="formPagoMensual" readonly style="font-size: 1.15rem; font-weight: 700; color: var(--primary-dark); background-color: #ccfbf1; border: 1px solid var(--primary); cursor: not-allowed;">
-                    <span class="formula-info-badge">(ValorHora * Horas * Semanas) + Antigüedad</span>
                 </div>
             </div>
             
@@ -1302,8 +1291,8 @@
             const valorAntiguedad = excluirAntiguedad ? 0 : (horasSemanales * valorHora * 0.05 * antiguedadAños);
             document.getElementById('formValorAntiguedad').value = valorAntiguedad.toFixed(2);
 
-            // 2. Depósito Semanal: Básico semanal (Horas * Valor hora) + Viajes
-            const deposito = (valorHora * horasSemanales) + viajesColectivos;
+            // 2. Depósito Semanal: Básico semanal (Horas * Valor hora) + Viajes + Antigüedad
+            const deposito = (valorHora * horasSemanales) + viajesColectivos + valorAntiguedad;
             document.getElementById('formDeposito').value = deposito.toFixed(2);
 
             // 3. Licencia Restante: Licencia anual - Licencia gozada
@@ -1559,10 +1548,10 @@
             body += `- Valor Hora: $${valorHora.toLocaleString('es-AR')}\n`;
             body += `- Horas Semanales: ${horasSemanales} hrs\n`;
             if (viajes > 0) body += `- Viajes Colectivos: $${viajes.toLocaleString('es-AR')}\n`;
-            if (!excluirAntiguedad && antiguedad > 0) body += `- Antigüedad (pago mensual único): $${antiguedad.toLocaleString('es-AR')}\n`;
+            if (!excluirAntiguedad && antiguedad > 0) body += `- Antigüedad: $${antiguedad.toLocaleString('es-AR')}\n`;
             body += `-----------------------------------\n`;
             
-            const totalDepositar = deposito + (!excluirAntiguedad ? antiguedad : 0);
+            const totalDepositar = deposito;
             body += `Total a depositar en la semana: $${totalDepositar.toLocaleString('es-AR')}\n\n`;
             body += `Saludos.`;
 

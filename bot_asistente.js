@@ -271,9 +271,9 @@ class BotAsistente {
                     const input = document.getElementById('botInput');
                     if (input) {
                         if (finalTranscript) {
-                            input.value = finalTranscript;
+                            input.innerText = finalTranscript;
                         } else if (interimTranscript) {
-                            input.value = interimTranscript;
+                            input.innerText = interimTranscript;
                         }
                     }
                 };
@@ -725,15 +725,24 @@ class BotAsistente {
                 height: 38px;
             }
 
-            .wa-input-container input {
+            #botInput {
                 flex: 1;
                 border: none;
                 outline: none;
-                font-size: 16px; /* Evita que Safari en iOS haga zoom automático al enfocar */
+                font-size: 16px;
                 background: transparent;
-                padding: 8px 0;
+                padding: 10px 0;
                 color: #111;
                 min-width: 0;
+                max-height: 100px;
+                overflow-y: auto;
+                word-break: break-word;
+                white-space: pre-wrap;
+            }
+            #botInput[placeholder]:empty:before {
+                content: attr(placeholder);
+                color: #8696a0;
+                pointer-events: none;
             }
 
             .bot-mic-btn {
@@ -841,7 +850,7 @@ class BotAsistente {
                 <div class="bot-messages" id="botMessages"></div>
                 <div class="bot-input-area">
                     <div class="wa-input-container">
-                        <input type="text" id="botInput" placeholder="Escribe un mensaje..." onkeypress="window.botInstance.handleKeyPress(event)">
+                        <div id="botInput" contenteditable="true" placeholder="Escribe un mensaje..." onkeydown="window.botInstance.handleKeyPress(event)"></div>
                         <button class="bot-attachment-btn" id="botAttachmentBtn" onclick="window.botInstance.triggerImageUpload(event)" title="Subir o tomar foto de factura">
                             <i class="fa-solid fa-camera"></i>
                         </button>
@@ -879,6 +888,33 @@ class BotAsistente {
             const micBtn = document.getElementById('botMicBtn');
             if (micBtn) micBtn.style.display = 'flex';
         }
+
+        // Escuchar pegado de imágenes desde el portapapeles (Desktop Ctrl+V)
+        document.addEventListener('paste', (e) => {
+            const win = document.getElementById('botWindow');
+            if (win && !win.classList.contains('show')) return;
+
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (const item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    const file = item.getAsFile();
+                    if (file) {
+                        e.preventDefault();
+                        
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const dataUrl = event.target.result;
+                            const imgHtml = `<div style="margin-top: 4px;"><img src="${dataUrl}" style="max-width: 100%; max-height: 180px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.15);"></div>`;
+                            this.appendMessage(imgHtml, 'user');
+                            this.showTypingIndicator();
+                            this.runOcrOnImage(file);
+                        };
+                        reader.readAsDataURL(file);
+                        break;
+                    }
+                }
+            }
+        });
     }
 
     sendWelcomeMessage() {
@@ -918,7 +954,7 @@ class BotAsistente {
         // 2. Limpiar el input
         const input = document.getElementById('botInput');
         if (input) {
-            input.value = '';
+            input.innerText = '';
         }
 
         // 3. Limpiar el contexto conversacional
@@ -930,12 +966,13 @@ class BotAsistente {
 
 
     sendPreset(text) {
-        document.getElementById('botInput').value = text;
+        document.getElementById('botInput').innerText = text;
         this.submitUserMessage();
     }
 
     handleKeyPress(event) {
-        if (event.key === 'Enter') {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
             this.submitUserMessage();
         }
     }
@@ -1001,7 +1038,7 @@ class BotAsistente {
 
     submitUserMessage() {
         const input = document.getElementById('botInput');
-        const text = input.value.trim();
+        const text = input.innerText.trim();
         if (!text) {
             this.appendMessage('Debe escribirme un mensaje de texto.', 'bot');
             return;
@@ -1009,7 +1046,7 @@ class BotAsistente {
 
         // Renderizar mensaje del usuario
         this.appendMessage(text, 'user');
-        input.value = '';
+        input.innerText = '';
 
 
         // Mostrar indicador de pensando (tres puntos saltarines)
@@ -2082,19 +2119,8 @@ class BotAsistente {
                 }
             }
 
-            this.hideTypingIndicator();
-
-            if (bills.length > 1) {
-                // Registrar contexto de carga secuencial
-                this.context = {
-                    pendingAction: "ocr_sequential",
-                    index: 0,
-                    bills: bills
-                };
-                this.appendMessage(`🔍 **Encontré ${bills.length} facturas en la imagen.** Vamos a registrarlas de a una:`, 'bot');
-                this.presentNextOcrBill();
-            } else {
-                // Fallback a una sola factura (comportamiento original)
+            if (bills.length === 0) {
+                // Fallback a una sola factura o procesar múltiples impuestos si no hubo múltiples fechas
                 const parsed = window.SmartNLPParser.parse(text);
                 const detectedAmount = this.extractAmountFromText(text) || parsed.detectedAmount;
                 
@@ -2117,11 +2143,43 @@ class BotAsistente {
                     }
                 }
 
-                const detectedTax = parsed.detectedTax;
                 const dateMonth = this.detectMonthFromExpirationDate(text);
                 const detectedMonth = dateMonth || parsed.detectedMonth || this.getCurrentMonthName();
 
-                this.sendOcrResultForm(detectedPropertyKey, detectedTax, detectedAmount, detectedMonth);
+                if (parsed.detectedTaxes && parsed.detectedTaxes.length > 0) {
+                    parsed.detectedTaxes.forEach(tax => {
+                        bills.push({
+                            propertyKey: detectedPropertyKey,
+                            taxName: tax,
+                            amount: detectedAmount,
+                            month: detectedMonth
+                        });
+                    });
+                } else {
+                    bills.push({
+                        propertyKey: detectedPropertyKey,
+                        taxName: parsed.detectedTax,
+                        amount: detectedAmount,
+                        month: detectedMonth
+                    });
+                }
+            }
+
+            this.hideTypingIndicator();
+
+            if (bills.length > 1) {
+                // Registrar contexto de carga secuencial
+                this.context = {
+                    pendingAction: "ocr_sequential",
+                    index: 0,
+                    bills: bills,
+                    queue: []
+                };
+                this.appendMessage(`🔍 **Encontré ${bills.length} facturas/impuestos en la imagen.** Vamos a registrarlos de a uno:`, 'bot');
+                this.presentNextOcrBill();
+            } else if (bills.length === 1) {
+                const bill = bills[0];
+                this.sendOcrResultForm(bill.propertyKey, bill.taxName, bill.amount, bill.month);
             }
         } catch (err) {
             console.error("OCR Error:", err);
@@ -2133,11 +2191,23 @@ class BotAsistente {
     extractAmountFromText(text) {
         let cleaned = text.replace(/\$\s+/g, "$");
         const regex = /\$?(\b\d{1,3}(?:\.\d{3})*(?:,\d{2})?\b|\b\d+(?:\.\d{2})?\b)/g;
-        let matches = cleaned.match(regex) || [];
         
         let candidates = [];
-        for (let m of matches) {
-            let valStr = m.replace('$', '').trim();
+        let match;
+        
+        while ((match = regex.exec(cleaned)) !== null) {
+            const valStr = match[1];
+            const fullMatch = match[0];
+            const matchIndex = match.index;
+            
+            // Verificar si está inmediatamente precedido o seguido por una barra / (evita tomar partes de fechas o cuotas como montos)
+            const charBefore = matchIndex > 0 ? cleaned[matchIndex - 1] : '';
+            const charAfter = matchIndex + fullMatch.length < cleaned.length ? cleaned[matchIndex + fullMatch.length] : '';
+            
+            if (charBefore === '/' || charAfter === '/' || charBefore === '-' || charAfter === '-') {
+                continue;
+            }
+
             // Descartar códigos de barra largos (más de 9 dígitos numéricos sin contar comas/puntos)
             if (valStr.replace(/[\.,]/g, '').length > 9) continue;
             
@@ -2160,7 +2230,11 @@ class BotAsistente {
             
             const num = parseFloat(normalized);
             if (!isNaN(num) && num > 0 && num !== 2025 && num !== 2026) {
-                candidates.push(num);
+                candidates.push({
+                    value: num,
+                    originalText: valStr,
+                    index: matchIndex
+                });
             }
         }
         
@@ -2176,14 +2250,10 @@ class BotAsistente {
             let idx = lowerText.indexOf(kw);
             if (idx !== -1) {
                 candidates.forEach(c => {
-                    let cStr = c.toString();
-                    let cIdx = lowerText.indexOf(cStr, Math.max(0, idx - 100));
-                    if (cIdx !== -1) {
-                        let dist = Math.abs(cIdx - idx);
-                        if (dist < minDistance && dist < 150) {
-                            minDistance = dist;
-                            bestCandidate = c;
-                        }
+                    let dist = Math.abs(c.index - idx);
+                    if (dist < minDistance && dist < 150) {
+                        minDistance = dist;
+                        bestCandidate = c.value;
                     }
                 });
             }
@@ -2191,9 +2261,9 @@ class BotAsistente {
         
         if (bestCandidate) return bestCandidate;
         
-        const filtered = candidates.filter(c => c < 1000000);
+        const filtered = candidates.filter(c => c.value < 1000000);
         if (filtered.length > 0) {
-            return Math.max(...filtered);
+            return Math.max(...filtered.map(c => c.value));
         }
         
         return null;
@@ -2329,7 +2399,21 @@ class BotAsistente {
         // Guardar celda en base de datos
         if (window.updateTaxCell) {
             const finalValue = isPending ? `p ${amount}` : amount;
-            window.updateTaxCell(month, tax, finalValue);
+            const isSequential = this.context && this.context.pendingAction === "ocr_sequential";
+            
+            if (isSequential) {
+                if (!this.context.queue) {
+                    this.context.queue = [];
+                }
+                this.context.queue.push({
+                    mes: month,
+                    columna: tax,
+                    monto: finalValue
+                });
+                window.updateTaxCell(month, tax, finalValue, true);
+            } else {
+                window.updateTaxCell(month, tax, finalValue, false);
+            }
             
             const statusText = isPending ? 'PENDIENTE' : 'PAGADO';
             const icon = isPending ? '🕐' : '⚡';
@@ -2350,12 +2434,12 @@ class BotAsistente {
                 `• Propiedad: <strong>${propLabel}</strong><br>` +
                 `• Mes: <strong>${month}</strong><br>` +
                 `• Monto: <strong>$${amount.toLocaleString('es-AR')}</strong> (${statusText})<br><br>` +
-                `Ya se guardó y actualizó en el tablero de control.`,
+                (isSequential ? `Guardado localmente en borrador. Se sincronizará con el servidor al finalizar todas.` : `Ya se guardó y actualizó en el tablero de control.`),
                 'bot'
             );
 
             // Si estamos en un proceso secuencial de múltiples facturas, avanzar al siguiente
-            if (this.context && this.context.pendingAction === "ocr_sequential") {
+            if (isSequential) {
                 this.context.index++;
                 setTimeout(() => {
                     this.presentNextOcrBill();
@@ -2366,12 +2450,45 @@ class BotAsistente {
         }
     }
 
-    presentNextOcrBill() {
+    async presentNextOcrBill() {
         if (!this.context || this.context.pendingAction !== "ocr_sequential") return;
-        const { index, bills } = this.context;
+        const { index, bills, queue } = this.context;
         if (index >= bills.length) {
-            this.context = null;
-            this.appendMessage("🎉 **¡Listo!** Ya procesamos todas las facturas que estaban en la imagen. 👍", 'bot');
+            const itemsToSync = queue || [];
+            this.context = null; // Limpiar contexto antes de la sincronización
+
+            if (itemsToSync.length > 0) {
+                this.appendMessage("🔄 **Sincronizando todas las facturas con el servidor...** Por favor, aguarda.", 'bot');
+                this.showTypingIndicator();
+                
+                if (window.setProcessing) window.setProcessing(true);
+                
+                const SCRIPT_URL = window.SCRIPT_URL;
+                const isDemo = !SCRIPT_URL || SCRIPT_URL.includes('TU_URL_DE_APPS_SCRIPT_AQUI');
+                
+                if (!isDemo) {
+                    for (const item of itemsToSync) {
+                        try {
+                            const url = `${SCRIPT_URL}?action=updateCell&mes=${encodeURIComponent(item.mes)}&columna=${encodeURIComponent(item.columna)}&monto=${encodeURIComponent(item.monto)}`;
+                            await fetch(url, { method: 'GET' });
+                        } catch (err) {
+                            console.error(`Error al sincronizar ${item.columna} (${item.mes}):`, err);
+                        }
+                    }
+                    if (window.loadAndRenderMatrix) {
+                        try {
+                            await window.loadAndRenderMatrix(true);
+                        } catch (err) {
+                            console.error("Error al recargar matriz:", err);
+                        }
+                    }
+                }
+                
+                if (window.setProcessing) window.setProcessing(false);
+                this.hideTypingIndicator();
+            }
+
+            this.appendMessage("🎉 **¡Listo!** Se han procesado y sincronizado todas las facturas de la imagen con éxito. 🚀", 'bot');
             return;
         }
 
