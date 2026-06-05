@@ -1767,13 +1767,11 @@
             };
             const Seccion = (num, divisor, strSingular, strPlural) => {
                 const cientos = Math.floor(num / divisor);
-                const resto = num - (cientos * divisor);
                 let letras = "";
                 if (cientos > 0) {
                     if (cientos > 1) letras = Centenas(cientos) + " " + strPlural;
                     else letras = strSingular;
-                } else letras = "";
-                if (resto > 0) letras += " " + Centenas(resto);
+                }
                 return letras.trim();
             };
             const Miles = (num) => {
